@@ -1,4 +1,7 @@
 const path = require('path');
+const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 module.exports = {
 	entry: path.join(__dirname, '/src/index.ts'),
@@ -17,7 +20,13 @@ module.exports = {
 		]
 	},
 	resolve: {
-		extensions: [".ts"]
+		extensions: ['.ts', '.js']
 	},
-	plugins: []
+	plugins: [
+		new CleanWebpackPlugin(),
+		new HtmlWebpackPlugin({
+			title: 'Hot Module Replacement'
+		}),
+		new webpack.HotModuleReplacementPlugin()
+	]
 };

@@ -2,7 +2,7 @@ function component() {
 	let element = document.createElement('div');
 
 
-	element.innerHTML = 'xyu';
+	element.innerHTML = 'hj';
 
 	return element;
 }
