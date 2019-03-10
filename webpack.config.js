@@ -24,9 +24,7 @@ module.exports = {
 	},
 	plugins: [
 		new CleanWebpackPlugin(),
-		new HtmlWebpackPlugin({
-			title: 'Hot Module Replacement'
-		}),
+		new HtmlWebpackPlugin({ title: 'TelegramChart' }),
 		new webpack.HotModuleReplacementPlugin()
 	]
 };
