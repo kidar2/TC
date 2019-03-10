@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+	"outDir": "ts-temp/",
+	"sourceMap": false,
+	"noImplicitAny": true,
+	"module": "es6",
+	"target": "es6",
+	"allowJs": true
+  },
+  "exclude": [
+	"node_modules"
+  ]
+}
