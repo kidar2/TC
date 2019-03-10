@@ -1,14 +1,14 @@
-import 'styles.scss';
+import './styles.scss';
 
 interface IChartConfig {
 	Width?: number;
 	Height?: number;
 	ParentNode: HTMLElement;
-	Series: [{
+	Series: {
 		Type?: string;
 		Name?: string;
-		Data?: [{ y?: number }]
-	}],
+		Data?: { y: number }[]
+	}[],
 	XAxis: {
 		Categories: string[];
 	}
@@ -30,5 +30,8 @@ export default class Chart {
 	{
 		this.root = document.createElement("div");
 		this.root.classList.add('chart');
+		this.root.style.width = this.config.Width + 'px';
+		this.root.style.height = this.config.Height + 'px';
+		this.config.ParentNode.appendChild(this.root);
 	}
 }

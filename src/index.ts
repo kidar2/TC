@@ -671,8 +671,8 @@ function main()
 			]
 		},
 		ParentNode: document.body,
-		Width: document.body.offsetWidth - 300,
-		Height: document.body.offsetHeight - 500
+		Width: Math.max(document.body.offsetWidth - 300, 300),
+		Height: Math.max(document.body.offsetHeight - 300, 300)
 	});
 }
 
