@@ -1,6 +1,6 @@
 import './styles.scss';
 import YAxis, {IYAxisConfig} from "./YAxis";
-import {IHash} from "./Util";
+import {createNode, createSVGNode, IHash} from "./Util";
 import Series from "./Series";
 
 
@@ -17,6 +17,7 @@ export interface IChartConfig {
 	ParentNode: HTMLElement;
 	Data: IChartData;
 	XAxis?: IYAxisConfig;
+	Title?: string;
 }
 
 
@@ -25,12 +26,18 @@ export default class Chart {
 	config: IChartConfig;
 	private root: HTMLDivElement;
 	private svg: SVGSVGElement;
+	private chartArea: SVGElement;
+	private legendNode: SVGElement;
 	private yAxis: YAxis;
 	private Series: Series[];
+
+	private legendHeight: number;
+	private titleHeight: number;
 
 	public constructor(config: IChartConfig)
 	{
 		this.config = config;
+		this.legendHeight = 50;
 		this.render();
 	}
 
@@ -43,7 +50,10 @@ export default class Chart {
 		this.svg = document.createElementNS("http://www.w3.org/2000/svg", "svg") as SVGSVGElement;
 		this.svg.setAttribute("viewBox", "0 0 " + this.config.Width + " " + this.config.Height);
 
+		createNode('div', this.root, "chart__title").innerText = this.config.Title;
 		this.root.appendChild(this.svg);
+
+		this.chartArea = createSVGNode('g', this.svg, {type: "area"});
 
 
 		this.Series = [];
@@ -67,16 +77,19 @@ export default class Chart {
 
 				for (let i = 1; i < c.length; i++)
 				{
-					if (c[i] > max)
-						max = c[i] as number;
+					if (c[i] != null)
+					{
+						if (c[i] > max)
+							max = c[i] as number;
 
-					if (c[i] < min)
-						min = c[i] as number;
+						if (c[i] < min)
+							min = c[i] as number;
+					}
 				}
 			}
 		});
 
-		this.yAxis = new YAxis({Min: min, Max: max, ...this.config.XAxis}, this.svg);
+		this.yAxis = new YAxis({Min: min, Max: max, ...this.config.XAxis}, this.chartArea);
 		this.setSize(this.config.Width, this.config.Height);
 	}
 
@@ -88,6 +101,6 @@ export default class Chart {
 		this.root.style.height = this.config.Height + 'px';
 		this.svg.style.width = this.config.Width + 'px';
 		this.svg.style.height = this.config.Height + 'px';
-		this.yAxis.update(this.config.Height);
+		this.yAxis.update(this.config.Height - this.legendHeight, this.config.Width);
 	}
 }

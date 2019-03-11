@@ -4,6 +4,7 @@ export interface IYAxisConfig {
 	Min?: number;
 	Max?: number;
 	Color?: string;
+	GridColor?: string;
 	TicksCount?: number;
 	LineVisible?: boolean;
 }
@@ -12,21 +13,22 @@ export interface IYAxisConfig {
 const YAxisDefaultConfig: IYAxisConfig = {
 	Min: 0,
 	Max: 100,
-	Color: "black",
-	TicksCount: 10,
+	Color: "#e0e0e0",
+	GridColor: "#e0e0e0",
+	TicksCount: 9,
 	LineVisible: true
 };
 
 export default class YAxis {
 	config: IYAxisConfig;
-	svgNode: SVGSVGElement;
+	parentNode: SVGElement;
 	group: SVGElement;
 	marginLeft: number;
 
-	public constructor(config: IYAxisConfig, svgNode: SVGSVGElement)
+	public constructor(config: IYAxisConfig, svgNode: SVGElement)
 	{
 		this.config = {...YAxisDefaultConfig, ...config};
-		this.svgNode = svgNode;
+		this.parentNode = svgNode;
 		this.marginLeft = 40;
 	}
 
@@ -46,13 +48,12 @@ export default class YAxis {
 		return Math.pow(10, countR) / 2;
 	}
 
-	public update(height: number)
+	public update(height: number, width: number)
 	{
 		if (this.group && this.group.parentNode)
 			this.group.parentNode.removeChild(this.group);
 
-		this.group = createSVGNode("g");
-		this.svgNode.appendChild(this.group);
+		this.group = createSVGNode("g", this.parentNode, {type: "yAxis"});
 
 		if (this.config.LineVisible)
 		{
@@ -80,10 +81,10 @@ export default class YAxis {
 
 
 			createSVGNode("line", this.group, {
-				x1: this.marginLeft - 10,
+				x1: 0,
 				y1: height - h,
 				y2: height - h,
-				x2: this.marginLeft,
+				x2: width,
 				stroke: this.config.Color,
 				"stroke-width": 1,
 				"shape-rendering": "crispEdges"
@@ -91,7 +92,7 @@ export default class YAxis {
 
 			createSVGNode("text", this.group, {
 				x: 0,
-				y: height - h + 4,
+				y: height - h - 4,
 				style: "font-size: 11px"
 			}).textContent = formatValue(y);
 		}

@@ -7,8 +7,9 @@ function main()
 		Data: CHARTS_DATA[0] as any,
 		ParentNode: document.body,
 		XAxis: {
-			LineVisible: true
+			LineVisible: false
 		},
+		Title: "Telegram data",
 		Width: Math.max(document.body.offsetWidth - 300, 300),
 		Height: Math.max(document.body.offsetHeight - 300, 300)
 	});

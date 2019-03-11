@@ -3,6 +3,12 @@
   position: relative;
   display: inline-block;
   border: 1px solid black;
+  user-select: none;
+
+  &__title
+  {
+    user-select: text;
+  }
 }
 
 html, body

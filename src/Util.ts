@@ -12,6 +12,16 @@ export function createSVGNode(tag: string, parentNode?: SVGElement, attrs?: any)
 	return res;
 }
 
+export function createNode(tag: string, parentNode?: HTMLElement, className?: string): HTMLElement
+{
+	let res = document.createElement(tag);
+	if (parentNode)
+		parentNode.appendChild(res);
+	if (className)
+		res.classList.add(className);
+	return res;
+}
+
 
 export interface IHash<T> {
 	[key: string]: T
