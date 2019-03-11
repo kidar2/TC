@@ -1,22 +1,22 @@
 import {createSVGNode, formatValue} from "./Util";
 
 export interface IYAxisConfig {
-	Min?: number;
-	Max?: number;
-	Color?: string;
-	GridColor?: string;
-	TicksCount?: number;
-	LineVisible?: boolean;
+	min?: number;
+	max?: number;
+	color?: string;
+	gridColor?: string;
+	ticksCount?: number;
+	lineVisible?: boolean;
 }
 
 
 const YAxisDefaultConfig: IYAxisConfig = {
-	Min: 0,
-	Max: 100,
-	Color: "#e0e0e0",
-	GridColor: "#e0e0e0",
-	TicksCount: 9,
-	LineVisible: true
+	min: 0,
+	max: 100,
+	color: "#e0e0e0",
+	gridColor: "#e0e0e0",
+	ticksCount: 9,
+	lineVisible: true
 };
 
 export default class YAxis {
@@ -35,7 +35,7 @@ export default class YAxis {
 
 	private getTopValue()
 	{
-		let countR = (this.config.Max).toFixed(0).length,
+		let countR = (this.config.max).toFixed(0).length,
 			 topValue = Math.pow(10, countR) / 2;
 
 		return topValue;
@@ -43,7 +43,7 @@ export default class YAxis {
 
 	private getBottomValue()
 	{
-		let countR = (this.config.Max).toFixed(0).length - 1;
+		let countR = (this.config.max).toFixed(0).length - 1;
 
 		return Math.pow(10, countR) / 2;
 	}
@@ -55,21 +55,21 @@ export default class YAxis {
 
 		this.group = createSVGNode("g", this.parentNode, {type: "yAxis"});
 
-		if (this.config.LineVisible)
+		if (this.config.lineVisible)
 		{
 			createSVGNode("line", this.group, {
 				x1: this.marginLeft,
 				y1: 0,
 				y2: height,
 				x2: this.marginLeft,
-				stroke: this.config.Color,
+				stroke: this.config.color,
 				"stroke-width": 1,
 				"shape-rendering": "crispEdges"
 			});
 		}
 
 
-		let ticksCount = this.config.TicksCount,
+		let ticksCount = this.config.ticksCount,
 			 topValue = this.getTopValue(),
 			 bottomValue = this.getBottomValue(),
 			 step = Math.round(Math.abs((topValue - bottomValue) / ticksCount));
@@ -85,7 +85,7 @@ export default class YAxis {
 				y1: height - h,
 				y2: height - h,
 				x2: width,
-				stroke: this.config.Color,
+				stroke: this.config.color,
 				"stroke-width": 1,
 				"shape-rendering": "crispEdges"
 			});

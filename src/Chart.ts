@@ -12,12 +12,12 @@ export interface IChartData {
 }
 
 export interface IChartConfig {
-	Width?: number;
-	Height?: number;
-	ParentNode: HTMLElement;
-	Data: IChartData;
-	XAxis?: IYAxisConfig;
-	Title?: string;
+	width?: number;
+	height?: number;
+	parentNode: HTMLElement;
+	data: IChartData;
+	xAxis?: IYAxisConfig;
+	title?: string;
 }
 
 
@@ -45,12 +45,12 @@ export default class Chart {
 	{
 		this.root = document.createElement("div");
 		this.root.classList.add('chart');
-		this.config.ParentNode.appendChild(this.root);
+		this.config.parentNode.appendChild(this.root);
 
 		this.svg = document.createElementNS("http://www.w3.org/2000/svg", "svg") as SVGSVGElement;
-		this.svg.setAttribute("viewBox", "0 0 " + this.config.Width + " " + this.config.Height);
+		this.svg.setAttribute("viewBox", "0 0 " + this.config.width + " " + this.config.height);
 
-		createNode('div', this.root, "chart__title").innerText = this.config.Title;
+		createNode('div', this.root, "chart__title").innerText = this.config.title;
 		this.root.appendChild(this.svg);
 
 		this.chartArea = createSVGNode('g', this.svg, {type: "area"});
@@ -60,20 +60,22 @@ export default class Chart {
 		let min = Number.MAX_VALUE,
 			 max = Number.MIN_VALUE;
 
-		this.config.Data.columns.forEach((c: Array<string | number>) =>
+		this.config.data.columns.forEach((c: Array<string | number>) =>
 		{
 			let id = c[0] as string;
-			if (this.config.Data.types[id] == "x")
+			if (this.config.data.types[id] == "x")
 			{
 				//create categoryAxis
 			}
 			else
 			{
-				this.Series.push(new Series(c,
-					 this.config.Data.types[id],
-					 this.config.Data.names[id],
-					 this.config.Data.colors[id]
-				));
+				this.Series.push(new Series({
+					data: c,
+					type: this.config.data.types[id],
+					name: this.config.data.names[id],
+					color: this.config.data.colors[id],
+					parentNode: this.chartArea
+				}));
 
 				for (let i = 1; i < c.length; i++)
 				{
@@ -89,18 +91,19 @@ export default class Chart {
 			}
 		});
 
-		this.yAxis = new YAxis({Min: min, Max: max, ...this.config.XAxis}, this.chartArea);
-		this.setSize(this.config.Width, this.config.Height);
+		this.yAxis = new YAxis({min: min, max: max, ...this.config.xAxis}, this.chartArea);
+		this.setSize(this.config.width, this.config.height);
+		this.Series.forEach(s => s.update());
 	}
 
 	public setSize(width: number, height: number)
 	{
-		this.config.Width = width;
-		this.config.Height = height;
-		this.root.style.width = this.config.Width + 'px';
-		this.root.style.height = this.config.Height + 'px';
-		this.svg.style.width = this.config.Width + 'px';
-		this.svg.style.height = this.config.Height + 'px';
-		this.yAxis.update(this.config.Height - this.legendHeight, this.config.Width);
+		this.config.width = width;
+		this.config.height = height;
+		this.root.style.width = this.config.width + 'px';
+		this.root.style.height = this.config.height + 'px';
+		this.svg.style.width = this.config.width + 'px';
+		this.svg.style.height = this.config.height + 'px';
+		this.yAxis.update(this.config.height - this.legendHeight, this.config.width);
 	}
 }

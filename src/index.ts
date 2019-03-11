@@ -4,14 +4,14 @@ import {CHARTS_DATA} from "./ChartData";
 function main()
 {
 	new Chart({
-		Data: CHARTS_DATA[0] as any,
-		ParentNode: document.body,
-		XAxis: {
-			LineVisible: false
+		data: CHARTS_DATA[0] as any,
+		parentNode: document.body,
+		xAxis: {
+			lineVisible: false
 		},
-		Title: "Telegram data",
-		Width: Math.max(document.body.offsetWidth - 300, 300),
-		Height: Math.max(document.body.offsetHeight - 300, 300)
+		title: "Telegram data",
+		width: Math.max(document.body.offsetWidth - 300, 300),
+		height: Math.max(document.body.offsetHeight - 300, 300)
 	});
 }
 
