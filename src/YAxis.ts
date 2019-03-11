@@ -31,6 +31,21 @@ export default class YAxis {
 	}
 
 
+	private getTopValue()
+	{
+		let countR = (this.config.Max).toFixed(0).length,
+			 topValue = Math.pow(10, countR) / 2;
+
+		return topValue;
+	}
+
+	private getBottomValue()
+	{
+		let countR = (this.config.Max).toFixed(0).length - 1;
+
+		return Math.pow(10, countR) / 2;
+	}
+
 	public update(height: number)
 	{
 		if (this.group && this.group.parentNode)
@@ -52,20 +67,22 @@ export default class YAxis {
 			});
 		}
 
+
 		let ticksCount = this.config.TicksCount,
-			 step = Math.abs((this.config.Max - this.config.Min) / ticksCount);
+			 topValue = this.getTopValue(),
+			 bottomValue = this.getBottomValue(),
+			 step = Math.round(Math.abs((topValue - bottomValue) / ticksCount));
 
-		for (let x = this.config.Min; x < this.config.Max; x += step)
+		for (let y = topValue - step; y >= bottomValue; y -= step)
 		{
-			let perc = x / this.config.Max,
-				 h = perc * height;   //высота в реале
+			let perc = y / topValue,
+				 h = perc * height;
 
-			//на высоте h надо рисовать tick и подпись
 
 			createSVGNode("line", this.group, {
 				x1: this.marginLeft - 10,
-				y1: h,
-				y2: h,
+				y1: height - h,
+				y2: height - h,
 				x2: this.marginLeft,
 				stroke: this.config.Color,
 				"stroke-width": 1,
@@ -74,9 +91,9 @@ export default class YAxis {
 
 			createSVGNode("text", this.group, {
 				x: 0,
-				y: h,
+				y: height - h + 4,
 				style: "font-size: 11px"
-			}).textContent = formatValue(h);
+			}).textContent = formatValue(y);
 		}
 	}
 }
