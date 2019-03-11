@@ -1,18 +1,22 @@
 import './styles.scss';
-import YAxis from "./YAxis";
+import YAxis, {IYAxisConfig} from "./YAxis";
+import {IHash} from "./Util";
+import Series from "./Series";
 
-interface IChartConfig {
+
+export interface IChartData {
+	columns: [][],
+	types: IHash<string>;
+	names: IHash<string>;
+	colors: IHash<string>;
+}
+
+export interface IChartConfig {
 	Width?: number;
 	Height?: number;
 	ParentNode: HTMLElement;
-	Series: {
-		Type?: string;
-		Name?: string;
-		Data?: { y: number }[]
-	}[],
-	XAxis: {
-		Categories: string[];
-	}
+	Data: IChartData;
+	XAxis?: IYAxisConfig;
 }
 
 
@@ -22,6 +26,7 @@ export default class Chart {
 	private root: HTMLDivElement;
 	private svg: SVGSVGElement;
 	private yAxis: YAxis;
+	private Series: Series[];
 
 	public constructor(config: IChartConfig)
 	{
@@ -39,12 +44,40 @@ export default class Chart {
 		this.svg.setAttribute("viewBox", "0 0 " + this.config.Width + " " + this.config.Height);
 
 		this.root.appendChild(this.svg);
+
+
+		this.Series = [];
+		let min = Number.MAX_VALUE,
+			 max = Number.MIN_VALUE;
+
+		this.config.Data.columns.forEach((c: Array<string | number>) =>
+		{
+			let id = c[0] as string;
+			if (this.config.Data.types[id] == "x")
+			{
+				//create categoryAxis
+			}
+			else
+			{
+				this.Series.push(new Series(c,
+					 this.config.Data.types[id],
+					 this.config.Data.names[id],
+					 this.config.Data.colors[id]
+				));
+
+				for (let i = 1; i < c.length; i++)
+				{
+					if (c[i] > max)
+						max = c[i] as number;
+
+					if (c[i] < min)
+						min = c[i] as number;
+				}
+			}
+		});
+
+		this.yAxis = new YAxis({Min: min, Max: max, ...this.config.XAxis}, this.svg);
 		this.setSize(this.config.Width, this.config.Height);
-
-		let min = 0, max = 100;
-
-		this.yAxis = new YAxis({Min: min, Max: max, Color: "black"}, this.svg);
-		this.yAxis.update(this.config.Height);
 	}
 
 	public setSize(width: number, height: number)
@@ -55,5 +88,6 @@ export default class Chart {
 		this.root.style.height = this.config.Height + 'px';
 		this.svg.style.width = this.config.Width + 'px';
 		this.svg.style.height = this.config.Height + 'px';
+		this.yAxis.update(this.config.Height);
 	}
 }

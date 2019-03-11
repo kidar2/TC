@@ -1,7 +1,84 @@
-export function createSVGNode(tag: string, attrs: any): SVGElement
+let numeral = require('numeral');
+
+export function createSVGNode(tag: string, parentNode?: SVGElement, attrs?: any): SVGElement
 {
 	let res = document.createElementNS("http://www.w3.org/2000/svg", tag);
-	for (let p in attrs)
-		res.setAttribute(p, attrs[p]);
+	if (attrs)
+		for (let p in attrs)
+			res.setAttribute(p, attrs[p]);
+
+	if (parentNode)
+		parentNode.appendChild(res);
 	return res;
+}
+
+
+export interface IHash<T> {
+	[key: string]: T
+}
+
+function isVerySmallValue(value: number)
+{
+	return Math.abs(value).toFixed(5) == '0.00000';
+}
+
+
+const powerIndexes = [1, 1000, 1000000, 1000000000, 1000000000000, 1000000000000000];
+const suffixes = ["k", "M", "B", "Tr", "Q"];
+
+export function formatValue(value: number, coef?: number)
+{
+	if (value == null)
+		return "";
+
+	if (!coef)
+	{
+		if (value > 1000)
+			coef = 1000;
+		else
+			coef = 1;
+	}
+	let suffix = "";
+	let format = "0,0.[00]";
+
+	if (coef && powerIndexes.indexOf(coef) > -1)
+	{
+		let index = powerIndexes.indexOf(coef);
+		suffix = suffixes[index - 1] || "";
+		value = value / powerIndexes[index];
+
+		if (isVerySmallValue(value))
+			value = 0;  //слишком маленькое значение
+
+		return numeral(value).format(format) + suffix;
+	}
+	else
+	{
+		if (isVerySmallValue(value))
+			value = 0;
+
+		if (Math.abs(value) < 1000)
+		{
+
+			return numeral(value).format(format);
+		}
+
+		let power = 5;
+		for (let i = 0; i < powerIndexes.length; i++)
+		{
+			if (Math.abs(value / powerIndexes[i]) < 1000)
+			{
+				power = i;
+				break;
+			}
+		}
+		value /= Math.pow(1000, power);
+		if (power)
+			suffix = suffixes[power - 1] || "";
+
+
+		if (!format)
+			return value + suffix;
+		return numeral(value).format(format) + suffix;
+	}
 }
