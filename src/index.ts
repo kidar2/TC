@@ -4,8 +4,10 @@ import {CategoriesType} from "./XAxis";
 
 function main()
 {
-	 CHARTS_DATA.forEach(data =>
-	 {
+	let w = Math.max(document.body.offsetWidth - 300, 300),
+		 h = Math.max(document.body.offsetHeight - 300, 300);
+	CHARTS_DATA.forEach(data =>
+	{
 		new Chart({
 			data: data as any,
 			parentNode: document.body,
@@ -16,8 +18,8 @@ function main()
 				type: CategoriesType.date
 			},
 			title: "Telegram data",
-			width: Math.max(document.body.offsetWidth - 300, 300),
-			height: Math.max(document.body.offsetHeight - 300, 300)
+			width: w,
+			height: h
 		});
 	});
 }

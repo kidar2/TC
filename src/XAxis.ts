@@ -57,12 +57,19 @@ export default class XAxis {
 			"shape-rendering": "crispEdges"
 		});
 
-		const labelWidth = calcSize(this.labels).width,
+		let labelWidth = calcSize(this.labels).width,
 			 labelMargin = 10,
 			 countView = width / (labelWidth + labelMargin);
 
 		let step = Math.round(this.labels.length / countView);
 
+		if (step == 1)
+		{
+			//we can show all labels
+			labelMargin = (width - labelWidth * this.labels.length) / (this.labels.length - 1);
+		}
+
+		let startX = 0;
 		for (let i = this.labels.length - 1, index = 1; i >= 0; i -= step, index++)
 		{
 			let label = this.labels[i],
@@ -74,22 +81,21 @@ export default class XAxis {
 				y: top + 15,
 				style: "font-size: 11px"
 			}).textContent = label;
-
-			this.labelScale.push({x, label});
+			startX = x;
 		}
-	}
 
-	public getLabelByX(x: number)
-	{
-		for (let i = 1; i < this.labelScale.length - 1; i++)
+		let stepX = width / (this.labels.length - 1),
+			 x = startX;
+		for (let i = 1; i < this.labels.length; i++)
 		{
-			if (this.labelScale[i].x >= x && this.labelScale[i - 1].x < x)
-				return this.labelScale[i];
+			this.labelScale.push({x: x, label: this.labels[i]});
+			x += stepX;
 		}
 	}
 
-	public getLabelByName(label: string)
+	public getXByIndex(index: number)
 	{
-		return this.labelScale.find(item => item.label == label);
+		return this.labelScale[index].x;
 	}
+
 }

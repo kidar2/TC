@@ -124,6 +124,6 @@ export default class Chart {
 		this.svg.style.height = (this.config.height - this.titleHeight) + 'px';
 		this.yAxis.update(this.getPlotAreaHeight(), this.config.width);
 		this.xAxis.update(this.getPlotAreaHeight(), this.config.width);
-		this.Series.forEach(s => s.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.yAxis, this.yAxis.getWidth()));
+		this.Series.forEach(s => s.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.yAxis, this.xAxis));
 	}
 }

@@ -115,6 +115,11 @@ export function formatDate(date: Date)
 }
 
 
+/**
+ * Calculate size of strings
+ * @param labels
+ * @param fontSize
+ */
 export function calcSize(labels: string[], fontSize?: number): { width: number, height: number }
 {
 	let div = document.createElement("div");

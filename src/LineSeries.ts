@@ -1,5 +1,6 @@
 import YAxis from "./YAxis";
 import {createSVGNode, removeNode} from "./Util";
+import XAxis from "./XAxis";
 
 interface ISeriesConfig {
 	data: Array<string | number>;
@@ -24,16 +25,14 @@ export default class LineSeries {
 		this.id = config.data[0] as string;
 	}
 
-	public update(areaHeight: number, areaWidth: number, yAxis: YAxis, marginLeft: number = 0)
+	public update(areaHeight: number, areaWidth: number, yAxis: YAxis, xAxis: XAxis)
 	{
 		if (this.nodes)
 			this.nodes.forEach(n => removeNode(n));
 
 		this.nodes = [];
 		let points = "",
-			 x = marginLeft,
-			 topValue = yAxis.getTopValue(),
-			 stepX = areaWidth / (this.config.data.length - 1);
+			 topValue = yAxis.getTopValue();
 
 		for (let i = 1; i < this.config.data.length; i++)
 		{
@@ -45,7 +44,7 @@ export default class LineSeries {
 				let perc = value / topValue,
 					 y = areaHeight - perc * areaHeight;
 
-				points += x + " " + y;
+				points += xAxis.getXByIndex(i - 1) + " " + y;
 			}
 			else if (points)
 			{
@@ -56,7 +55,6 @@ export default class LineSeries {
 				}));
 				points = "";
 			}
-			x += stepX;
 		}
 
 		if (points)
