@@ -24,14 +24,14 @@ export default class LineSeries {
 		this.id = config.data[0] as string;
 	}
 
-	public update(areaHeight: number, areaWidth: number, yAxis: YAxis)
+	public update(areaHeight: number, areaWidth: number, yAxis: YAxis, marginLeft: number = 0)
 	{
 		if (this.nodes)
 			this.nodes.forEach(n => removeNode(n));
 
 		this.nodes = [];
 		let points = "",
-			 x = 0,
+			 x = marginLeft,
 			 topValue = yAxis.getTopValue(),
 			 stepX = areaWidth / (this.config.data.length - 1);
 

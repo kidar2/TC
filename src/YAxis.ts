@@ -1,4 +1,4 @@
-import {createSVGNode, formatValue, removeNode} from "./Util";
+import {calcSize, createSVGNode, formatValue, removeNode} from "./Util";
 
 export interface IYAxisConfig {
 	min?: number;
@@ -7,6 +7,7 @@ export interface IYAxisConfig {
 	gridColor?: string;
 	ticksCount?: number;
 	lineVisible?: boolean;
+	fontSize?: number;
 }
 
 
@@ -16,6 +17,7 @@ const YAxisDefaultConfig: IYAxisConfig = {
 	color: "#e0e0e0",
 	gridColor: "#e0e0e0",
 	ticksCount: 9,
+	fontSize: 11,
 	lineVisible: true
 };
 
@@ -24,6 +26,7 @@ export default class YAxis {
 	parentNode: SVGElement;
 	group: SVGElement;
 	marginLeft: number;
+	widthOfLabels: number;
 
 	public constructor(config: IYAxisConfig, svgNode: SVGElement)
 	{
@@ -71,13 +74,13 @@ export default class YAxis {
 		let ticksCount = this.config.ticksCount,
 			 topValue = this.getTopValue(),
 			 bottomValue = this.getBottomValue(),
-			 step = Math.round(Math.abs((topValue - bottomValue) / ticksCount));
+			 step = Math.round(Math.abs((topValue - bottomValue) / ticksCount)),
+			 labels = [];
 
 		for (let y = topValue - step; y >= bottomValue; y -= step)
 		{
 			let perc = y / topValue,
 				 h = perc * height;
-
 
 			createSVGNode("line", this.group, {
 				x1: 0,
@@ -89,11 +92,21 @@ export default class YAxis {
 				"shape-rendering": "crispEdges"
 			});
 
+			let label = formatValue(y);
 			createSVGNode("text", this.group, {
 				x: 0,
 				y: height - h - 4,
-				style: "font-size: 11px"
-			}).textContent = formatValue(y);
+				style: `font-size: ${this.config.fontSize}px`
+			}).textContent = label;
+
+			labels.push(label);
 		}
+
+		this.widthOfLabels = calcSize(labels, this.config.fontSize).width;
+	}
+
+	getWidth()
+	{
+		return this.widthOfLabels;
 	}
 }

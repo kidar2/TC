@@ -30,13 +30,14 @@ export default class Chart {
 	private svg: SVGSVGElement;
 	private chartArea: SVGElement;
 	private legendNode: SVGElement;
+	private titleNode: HTMLElement;
 	private yAxis: YAxis;
 	private xAxis: XAxis;
 	private Series: LineSeries[];
 
 	private legendHeight: number;
 	private titleHeight: number;
-	private titleNode: HTMLElement;
+
 
 	public constructor(config: IChartConfig)
 	{
@@ -101,12 +102,16 @@ export default class Chart {
 
 		this.yAxis = new YAxis({min: min, max: max, ...this.config.yAxis}, this.chartArea);
 		this.setSize(this.config.width, this.config.height);
-		this.Series.forEach(s => s.update(this.getPlotAreaHeight(), this.config.width, this.yAxis));
 	}
 
 	getPlotAreaHeight()
 	{
 		return this.config.height - this.legendHeight - this.titleHeight;
+	}
+
+	getPlotAreaWidth()
+	{
+		return this.config.width - this.yAxis.getWidth();
 	}
 
 	public setSize(width: number, height: number)
@@ -119,5 +124,6 @@ export default class Chart {
 		this.svg.style.height = (this.config.height - this.titleHeight) + 'px';
 		this.yAxis.update(this.getPlotAreaHeight(), this.config.width);
 		this.xAxis.update(this.getPlotAreaHeight(), this.config.width);
+		this.Series.forEach(s => s.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.yAxis, this.yAxis.getWidth()));
 	}
 }

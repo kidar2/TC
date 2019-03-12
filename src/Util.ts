@@ -115,11 +115,13 @@ export function formatDate(date: Date)
 }
 
 
-export function calcSize(labels: string[]): { width: number, height: number }
+export function calcSize(labels: string[], fontSize?: number): { width: number, height: number }
 {
 	let div = document.createElement("div");
 	div.classList.add("calc-size-node");
 	div.innerHTML = labels.join("<br/>");
+	if (fontSize)
+		div.style.fontSize = fontSize + 'px';
 
 	document.body.appendChild(div);
 	let res = div.getBoundingClientRect();
