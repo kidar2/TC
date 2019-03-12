@@ -4,8 +4,8 @@ import {CategoriesType} from "./XAxis";
 
 function main()
 {
-	CHARTS_DATA.forEach(data =>
-	{
+	 CHARTS_DATA.forEach(data =>
+	 {
 		new Chart({
 			data: data as any,
 			parentNode: document.body,

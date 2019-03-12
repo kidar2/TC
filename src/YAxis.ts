@@ -16,7 +16,7 @@ const YAxisDefaultConfig: IYAxisConfig = {
 	max: 100,
 	color: "#e0e0e0",
 	gridColor: "#e0e0e0",
-	ticksCount: 9,
+	ticksCount: 10,
 	fontSize: 11,
 	lineVisible: true
 };
@@ -41,12 +41,15 @@ export default class YAxis {
 		let countR = (this.config.max).toFixed(0).length,
 			 topValue = Math.pow(10, countR) / 2;
 
+		if (topValue < this.config.max)
+			topValue *= 2;
+
 		return topValue;
 	}
 
 	private getBottomValue()
 	{
-		let countR = (this.config.max).toFixed(0).length - 1;
+		let countR = (this.config.min).toFixed(0).length - 1;
 
 		return Math.pow(10, countR) / 2;
 	}
