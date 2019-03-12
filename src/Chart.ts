@@ -82,9 +82,8 @@ export default class Chart {
 					data: c,
 					type: this.config.data.types[id],
 					name: this.config.data.names[id],
-					color: this.config.data.colors[id],
-					parentNode: this.chartArea
-				}));
+					color: this.config.data.colors[id]
+				}, this.chartArea));
 
 				for (let i = 1; i < c.length; i++)
 				{
@@ -102,7 +101,7 @@ export default class Chart {
 
 		this.yAxis = new YAxis({min: min, max: max, ...this.config.yAxis}, this.chartArea);
 		this.setSize(this.config.width, this.config.height);
-		this.Series.forEach(s => s.update());
+		this.Series.forEach(s => s.update(this.getPlotAreaHeight(), this.config.width, this.yAxis));
 	}
 
 	getPlotAreaHeight()

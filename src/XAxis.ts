@@ -84,7 +84,12 @@ export default class XAxis {
 		for (let i = 1; i < this.labelScale.length - 1; i++)
 		{
 			if (this.labelScale[i].x >= x && this.labelScale[i - 1].x < x)
-				return this.labelScale[i].label;
+				return this.labelScale[i];
 		}
+	}
+
+	public getLabelByName(label: string)
+	{
+		return this.labelScale.find(item => item.label == label);
 	}
 }

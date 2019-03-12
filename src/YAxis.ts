@@ -33,7 +33,7 @@ export default class YAxis {
 	}
 
 
-	private getTopValue()
+	public getTopValue()
 	{
 		let countR = (this.config.max).toFixed(0).length,
 			 topValue = Math.pow(10, countR) / 2;
