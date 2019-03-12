@@ -7,7 +7,7 @@
 
   &__title
   {
-    user-select: text;
+	 user-select: text;
   }
 }
 
@@ -16,4 +16,14 @@ html, body
   height: 100%;
   width: 100%;
   overflow: hidden;
+}
+
+
+.calc-size-node
+{
+  position: absolute;
+  visibility: hidden;
+  top: 0000px;
+  left: 0000px;
+  display: inline-block;
 }

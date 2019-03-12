@@ -7,7 +7,7 @@ interface ISeriesConfig {
 }
 
 
-export default class Series {
+export default class LineSeries {
 
 	config: ISeriesConfig;
 

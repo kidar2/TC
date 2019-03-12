@@ -1,7 +1,8 @@
 import './styles.scss';
 import YAxis, {IYAxisConfig} from "./YAxis";
+import XAxis, {IXAxisConfig} from "./XAxis";
 import {createNode, createSVGNode, IHash} from "./Util";
-import Series from "./Series";
+import LineSeries from "./LineSeries";
 
 
 export interface IChartData {
@@ -16,7 +17,8 @@ export interface IChartConfig {
 	height?: number;
 	parentNode: HTMLElement;
 	data: IChartData;
-	xAxis?: IYAxisConfig;
+	xAxis?: IXAxisConfig;
+	yAxis?: IYAxisConfig;
 	title?: string;
 }
 
@@ -29,15 +31,18 @@ export default class Chart {
 	private chartArea: SVGElement;
 	private legendNode: SVGElement;
 	private yAxis: YAxis;
-	private Series: Series[];
+	private xAxis: XAxis;
+	private Series: LineSeries[];
 
 	private legendHeight: number;
 	private titleHeight: number;
+	private titleNode: HTMLElement;
 
 	public constructor(config: IChartConfig)
 	{
 		this.config = config;
 		this.legendHeight = 50;
+		this.titleHeight = 0;
 		this.render();
 	}
 
@@ -48,12 +53,16 @@ export default class Chart {
 		this.config.parentNode.appendChild(this.root);
 
 		this.svg = document.createElementNS("http://www.w3.org/2000/svg", "svg") as SVGSVGElement;
-		this.svg.setAttribute("viewBox", "0 0 " + this.config.width + " " + this.config.height);
 
-		createNode('div', this.root, "chart__title").innerText = this.config.title;
+
+		this.titleNode = createNode('div', this.root, "chart__title");
+		this.titleNode.innerText = this.config.title;
+		this.titleHeight = this.titleNode.offsetHeight;
 		this.root.appendChild(this.svg);
 
 		this.chartArea = createSVGNode('g', this.svg, {type: "area"});
+
+		this.svg.setAttribute("viewBox", "0 0 " + this.config.width + " " + (this.config.height - this.titleHeight));
 
 
 		this.Series = [];
@@ -65,11 +74,11 @@ export default class Chart {
 			let id = c[0] as string;
 			if (this.config.data.types[id] == "x")
 			{
-				//create categoryAxis
+				this.xAxis = new XAxis({categories: c, ...this.config.xAxis}, this.chartArea);
 			}
 			else
 			{
-				this.Series.push(new Series({
+				this.Series.push(new LineSeries({
 					data: c,
 					type: this.config.data.types[id],
 					name: this.config.data.names[id],
@@ -91,9 +100,14 @@ export default class Chart {
 			}
 		});
 
-		this.yAxis = new YAxis({min: min, max: max, ...this.config.xAxis}, this.chartArea);
+		this.yAxis = new YAxis({min: min, max: max, ...this.config.yAxis}, this.chartArea);
 		this.setSize(this.config.width, this.config.height);
 		this.Series.forEach(s => s.update());
+	}
+
+	getPlotAreaHeight()
+	{
+		return this.config.height - this.legendHeight - this.titleHeight;
 	}
 
 	public setSize(width: number, height: number)
@@ -103,7 +117,8 @@ export default class Chart {
 		this.root.style.width = this.config.width + 'px';
 		this.root.style.height = this.config.height + 'px';
 		this.svg.style.width = this.config.width + 'px';
-		this.svg.style.height = this.config.height + 'px';
-		this.yAxis.update(this.config.height - this.legendHeight, this.config.width);
+		this.svg.style.height = (this.config.height - this.titleHeight) + 'px';
+		this.yAxis.update(this.getPlotAreaHeight(), this.config.width);
+		this.xAxis.update(this.getPlotAreaHeight(), this.config.width);
 	}
 }

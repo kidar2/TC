@@ -1,4 +1,4 @@
-import {createSVGNode, formatValue} from "./Util";
+import {createSVGNode, formatValue, removeNode} from "./Util";
 
 export interface IYAxisConfig {
 	min?: number;
@@ -50,8 +50,7 @@ export default class YAxis {
 
 	public update(height: number, width: number)
 	{
-		if (this.group && this.group.parentNode)
-			this.group.parentNode.removeChild(this.group);
+		removeNode(this.group);
 
 		this.group = createSVGNode("g", this.parentNode, {type: "yAxis"});
 

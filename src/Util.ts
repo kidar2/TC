@@ -22,6 +22,11 @@ export function createNode(tag: string, parentNode?: HTMLElement, className?: st
 	return res;
 }
 
+export function removeNode(node: Element)
+{
+	if (node && node.parentNode)
+		node.parentNode.removeChild(node);
+}
 
 export interface IHash<T> {
 	[key: string]: T
@@ -91,4 +96,33 @@ export function formatValue(value: number, coef?: number)
 			return value + suffix;
 		return numeral(value).format(format) + suffix;
 	}
+}
+
+let shortMonthNames = [
+	"Jan", "Feb", "Mar",
+	"Apr", "May", "Jun", "Jul",
+	"Aug", "Sep", "Oct",
+	"Nov", "Dec"
+];
+
+export function formatDate(date: Date)
+{
+	let day = date.getDate(),
+		 monthIndex = date.getMonth(),
+		 year = date.getFullYear();
+
+	return shortMonthNames[monthIndex] + ' ' + day + ' ' + year;
+}
+
+
+export function calcSize(labels: string[]): { width: number, height: number }
+{
+	let div = document.createElement("div");
+	div.classList.add("calc-size-node");
+	div.innerHTML = labels.join("<br/>");
+
+	document.body.appendChild(div);
+	let res = div.getBoundingClientRect();
+	document.body.removeChild(div);
+	return res;
 }
