@@ -52,16 +52,16 @@ export default class XAxis {
 		this.group = createSVGNode("g", this.parentNode, {type: "xAxis"});
 		this.labelScale = [];
 
-		//линия самой оси
-		createSVGNode("line", this.group, {
-			x1: marginLeft,
-			y1: top,
-			y2: top,
-			x2: width,
-			stroke: this.config.color,
-			"stroke-width": 1,
-			"shape-rendering": "crispEdges"
-		});
+		// //линия самой оси
+		// createSVGNode("line", this.group, {
+		// 	x1: marginLeft,
+		// 	y1: top,
+		// 	y2: top,
+		// 	x2: width,
+		// 	stroke: this.config.color,
+		// 	"stroke-width": 1,
+		// 	"shape-rendering": "crispEdges"
+		// });
 
 		let labelWidth = calcSize(this.labels).width,
 			 labelMargin = 10,

@@ -5,6 +5,7 @@ export default class Tooltip {
 
 	node: HTMLElement;
 	parentNode: HTMLElement;
+	currentLabel: string;
 
 	constructor(parentNode: HTMLElement)
 	{
@@ -17,6 +18,7 @@ export default class Tooltip {
 	hide()
 	{
 		removeNode(this.node);
+		this.currentLabel = null;
 	}
 
 	show(x: number,
@@ -24,6 +26,14 @@ export default class Tooltip {
 		  seriesValues: { name: string, value: number, color: string }[],
 		  pointLabel: string)
 	{
+		this.node.style.left = x + 'px';
+		this.node.style.top = y + 'px';
+
+		if (this.currentLabel == pointLabel)
+			return;
+
+		this.currentLabel = pointLabel;
+
 		if (!this.node.parentNode)
 			this.parentNode.appendChild(this.node);
 
@@ -33,8 +43,7 @@ export default class Tooltip {
 <span class="chart__tooltip__ser-name">${ser.name}</span>
 </div>`).join('');
 
-		this.node.style.left = x + 'px';
-		this.node.style.top = y + 'px';
+
 		this.node.innerHTML = `<div class="chart__tooltip__label">${pointLabel}</div><div >${str}</div>`;   //todo xss
 	}
 }

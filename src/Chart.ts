@@ -65,8 +65,6 @@ export default class Chart {
 
 		this.chartArea = createSVGNode('g', this.svg, {type: "area"});
 
-		this.svg.setAttribute("viewBox", "0 0 " + this.config.width + " " + (this.config.height - this.titleHeight));
-
 
 		this.series = [];
 		let min = Number.MAX_VALUE,
@@ -115,6 +113,7 @@ export default class Chart {
 		let label = this.xAxis.getLabelByX(e.offsetX),
 			 valueIndex = this.xAxis.getIndexByX(e.offsetX);
 
+
 		if (!label)
 			this.tooltip.hide();
 		else
@@ -130,7 +129,7 @@ export default class Chart {
 				});
 			}
 
-			this.tooltip.show(e.offsetX, e.offsetY, seriesValues, label);
+			this.tooltip.show(e.offsetX, e.offsetY + this.titleHeight, seriesValues, label);
 		}
 	}
 
@@ -150,6 +149,7 @@ export default class Chart {
 		this.config.height = height;
 		this.root.style.width = this.config.width + 'px';
 		this.root.style.height = this.config.height + 'px';
+		this.svg.setAttribute("viewBox", "0 0 " + this.config.width + " " + (this.config.height - this.titleHeight));
 		this.svg.style.width = this.config.width + 'px';
 		this.svg.style.height = (this.config.height - this.titleHeight) + 'px';
 		this.yAxis.update(this.getPlotAreaHeight(), this.config.width);
