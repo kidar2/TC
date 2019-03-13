@@ -13,26 +13,35 @@ export interface IXAxisConfig {
 	showGrid?: boolean;
 }
 
+export interface ICategory {
+	x: number,
+	label: string,
+	index: number
+}
+
 const XAxisDefaultConfig: IXAxisConfig = {
 	color: "#e0e0e0",
 	lineVisible: true,
 	type: CategoriesType.string,
 	fontSize: 11,
-	showGrid: true
+	showGrid: false
 };
 
 export default class XAxis {
 	config: IXAxisConfig;
 	parentNode: SVGElement;
 	public group: SVGElement;
+	private tooltipLine: SVGElement;
 	private labels: string[];
-	private labelScale: { x: number, label: string }[];
+	private labelScale: ICategory[];
 
 	public constructor(config: IXAxisConfig, svgNode: SVGElement)
 	{
 		this.config = {...XAxisDefaultConfig, ...config};
 		this.parentNode = svgNode;
 		this.labels = new Array(this.config.categories.length - 1);
+		this.tooltipLine = createSVGNode("line", null,{stroke: this.config.color});
+		this.tooltipLine.classList.add('chart__tooltip-obj');
 
 		for (let i = 1; i < this.config.categories.length; i++)
 		{
@@ -46,7 +55,7 @@ export default class XAxis {
 		}
 	}
 
-	public update(top: number, width: number, marginLeft: number)
+	public update(bottomPoint: number, width: number, marginLeft: number)
 	{
 		removeNode(this.group);
 		this.group = createSVGNode("g", this.parentNode, {type: "xAxis"});
@@ -82,14 +91,14 @@ export default class XAxis {
 
 		for (let i = 1; i < this.labels.length; i++)
 		{
-			this.labelScale.push({x: x, label: this.labels[i]});
+			this.labelScale.push({x: x, label: this.labels[i], index: i});
 
 			// вертикальная линия области построения
 			if (this.config.showGrid)
 				createSVGNode("line", this.group, {
 					x1: x,
 					y1: 0,
-					y2: top + 4,
+					y2: bottomPoint,
 					x2: x,
 					stroke: this.config.color,
 					"stroke-width": 1,
@@ -100,7 +109,7 @@ export default class XAxis {
 			{
 				createSVGNode("text", this.group, {
 					x: x - labelWidth / 2 + marginLeft,  // чтобы подпись была выровнена посередите точки построения
-					y: top + 15,
+					y: bottomPoint + 15,
 					style: fontSize
 				}).textContent = this.labels[i];
 			}
@@ -119,11 +128,26 @@ export default class XAxis {
 					break;
 				createSVGNode("text", this.group, {
 					x: x,
-					y: top + 15,
+					y: bottomPoint + 15,
 					style: fontSize
 				}).textContent = label;
 			}
 		}
+	}
+
+	public showTooltipLine(category: ICategory, bottomPoint: number)
+	{
+		if (!this.tooltipLine.parentNode)
+			this.group.appendChild(this.tooltipLine);
+		this.tooltipLine.setAttribute("x1", category.x + "");
+		this.tooltipLine.setAttribute("x2", category.x + "");
+		this.tooltipLine.setAttribute("y1", "0");
+		this.tooltipLine.setAttribute("y2", bottomPoint + "");
+	}
+
+	public hideTooltipLine()
+	{
+		removeNode(this.tooltipLine);
 	}
 
 	public getXByIndex(index: number)
@@ -131,7 +155,7 @@ export default class XAxis {
 		return this.labelScale[index].x;
 	}
 
-	private getCategory(x: number)
+	public getCategory(x: number)
 	{
 		if (this.labelScale[0].x > x)
 			return this.labelScale[0];
@@ -143,7 +167,7 @@ export default class XAxis {
 		{
 			if (x > this.labelScale[i - 1].x && x <= this.labelScale[i].x)
 			{
-				if (Math.abs(x  - this.labelScale[i - 1].x) < Math.abs(x  - this.labelScale[i].x))
+				if (Math.abs(x - this.labelScale[i - 1].x) < Math.abs(x - this.labelScale[i].x))
 				{
 					return this.labelScale[i - 1];
 				}
@@ -159,8 +183,8 @@ export default class XAxis {
 		return res && res.label;
 	}
 
-	public getIndexByX(x: number)
+	public getIndexOfCategory(x: ICategory)
 	{
-		return this.labelScale.indexOf(this.getCategory(x));
+		return this.labelScale.indexOf(x);
 	}
 }

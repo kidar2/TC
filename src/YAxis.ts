@@ -29,6 +29,7 @@ export default class YAxis {
 	group: SVGElement;
 	marginLeft: number;
 	widthOfLabels: number;
+	private height: number;
 
 	public constructor(config: IYAxisConfig, svgNode: SVGElement)
 	{
@@ -56,9 +57,16 @@ export default class YAxis {
 		return Math.pow(10, countR) / 2;
 	}
 
+	public calcHeightByValue(y: number, topValue: number)
+	{
+		let perc = y / topValue;
+		return  perc * this.height;
+	}
+
 	public update(height: number, width: number)
 	{
 		removeNode(this.group);
+		this.height = height;
 
 		this.group = createSVGNode("g", this.parentNode, {type: "yAxis"});
 
@@ -72,8 +80,7 @@ export default class YAxis {
 		if (this.config.showGrid)
 			for (let y = topValue - step; y >= bottomValue; y -= step)
 			{
-				let perc = y / topValue,
-					 h = perc * height;
+				let h = this.calcHeightByValue(y, topValue);
 
 				if (this.config.showGrid)
 					createSVGNode("line", this.group, {

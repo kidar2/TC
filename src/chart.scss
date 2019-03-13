@@ -10,6 +10,11 @@
   {
 	 user-select: text;
   }
+
+  &__tooltip-obj
+  {
+    pointer-events: none;
+  }
 }
 
 .calc-size-node

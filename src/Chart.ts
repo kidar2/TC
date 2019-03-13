@@ -103,33 +103,43 @@ export default class Chart {
 		this.yAxis = new YAxis({min: min, max: max, ...this.config.yAxis}, this.chartArea);
 		this.setSize(this.config.width, this.config.height);
 		this.svg.addEventListener("mousemove", (e: MouseEvent) => this._onMouseMove(e));
-		this.svg.addEventListener("mouseout", () => this.tooltip.hide());
+		this.svg.addEventListener("mouseout", () => this._hideToolTip());
 
 		this.tooltip = new Tooltip(this.root);
 	}
 
+	_hideToolTip()
+	{
+		this.tooltip.hide();
+		this.xAxis.hideTooltipLine();
+		this.series.forEach(s => s.hideToolTipPoint());
+	}
+
 	_onMouseMove(e: MouseEvent)
 	{
-		let label = this.xAxis.getLabelByX(e.offsetX),
-			 valueIndex = this.xAxis.getIndexByX(e.offsetX);
+		let category = this.xAxis.getCategory(e.offsetX);
 
-
-		if (!label)
-			this.tooltip.hide();
+		if (!category)
+		{
+			this._hideToolTip();
+		}
 		else
 		{
+			let valueIndex = this.xAxis.getIndexOfCategory(category);
 			let seriesValues = [];
-			for (let i = 1; i < this.config.data.columns.length; i++)  //первая ось, это ось Y
+			for (let i = 1; i < this.config.data.columns.length; i++)  //first array is category axis
 			{
 				let id = (this.config.data.columns[i] as any)[0];
 				seriesValues.push({
 					name: this.config.data.names[id],
-					value : this.config.data.columns[i][valueIndex],
-					color:  this.config.data.colors[id]
+					value: this.config.data.columns[i][valueIndex],
+					color: this.config.data.colors[id]
 				});
 			}
 
-			this.tooltip.show(e.offsetX, e.offsetY + this.titleHeight, seriesValues, label);
+			this.tooltip.show(e.offsetX, e.offsetY + this.titleHeight, seriesValues, category.label);
+			this.xAxis.showTooltipLine(category, this.getPlotAreaHeight());
+			this.series.forEach(s => s.showToolTipPoint(category));
 		}
 	}
 
