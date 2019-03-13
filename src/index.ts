@@ -12,7 +12,7 @@ function main()
 			data: data as any,
 			parentNode: document.body,
 			yAxis: {
-				lineVisible: false
+				showGrid: true
 			},
 			xAxis: {
 				type: CategoriesType.date

@@ -123,7 +123,7 @@ export default class Chart {
 		this.svg.style.width = this.config.width + 'px';
 		this.svg.style.height = (this.config.height - this.titleHeight) + 'px';
 		this.yAxis.update(this.getPlotAreaHeight(), this.config.width);
-		this.xAxis.update(this.getPlotAreaHeight(), this.config.width);
+		this.xAxis.update(this.getPlotAreaHeight(), this.config.width, this.yAxis.getWidth() + 10);
 		this.Series.forEach(s => s.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.yAxis, this.xAxis));
 	}
 }

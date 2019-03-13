@@ -1,4 +1,4 @@
-import {calcSize, createSVGNode, formatDate, formatValue, removeNode} from "./Util";
+import {calcSize, createSVGNode, formatDate, removeNode} from "./Util";
 
 export enum CategoriesType {
 	date, string
@@ -9,12 +9,16 @@ export interface IXAxisConfig {
 	lineVisible?: boolean;
 	categories?: Array<string | number>;
 	type?: CategoriesType;
+	fontSize?: number,
+	showGrid?: boolean;
 }
 
 const XAxisDefaultConfig: IXAxisConfig = {
 	color: "#e0e0e0",
 	lineVisible: true,
-	type: CategoriesType.string
+	type: CategoriesType.string,
+	fontSize: 11,
+	showGrid: true
 };
 
 export default class XAxis {
@@ -42,13 +46,15 @@ export default class XAxis {
 		}
 	}
 
-	public update(top: number, width: number)
+	public update(top: number, width: number, marginLeft: number)
 	{
 		removeNode(this.group);
 		this.group = createSVGNode("g", this.parentNode, {type: "xAxis"});
 		this.labelScale = [];
+
+		//линия самой оси
 		createSVGNode("line", this.group, {
-			x1: 0,
+			x1: marginLeft,
 			y1: top,
 			y2: top,
 			x2: width,
@@ -59,37 +65,64 @@ export default class XAxis {
 
 		let labelWidth = calcSize(this.labels).width,
 			 labelMargin = 10,
+			 fontSize = `font-size: ${this.config.fontSize}px`,
 			 countView = width / (labelWidth + labelMargin);
 
 		let step = Math.round(this.labels.length / countView);
-
-		if (step == 1)
+		if (step <= 1)
 		{
-			//we can show all labels
+			//значит можно отрисовать все подписи
+			step = 1;
 			labelMargin = (width - labelWidth * this.labels.length) / (this.labels.length - 1);
 		}
 
-		let startX = 0;
-		for (let i = this.labels.length - 1, index = 1; i >= 0; i -= step, index++)
-		{
-			let label = this.labels[i],
-				 x = width - index * (labelMargin + labelWidth);
-			if (x < 0)
-				break;
-			createSVGNode("text", this.group, {
-				x: x,
-				y: top + 15,
-				style: "font-size: 11px"
-			}).textContent = label;
-			startX = x;
-		}
 
 		let stepX = width / (this.labels.length - 1),
-			 x = startX;
+			 x = labelWidth / 2;
+
 		for (let i = 1; i < this.labels.length; i++)
 		{
 			this.labelScale.push({x: x, label: this.labels[i]});
+
+			// вертикальная линия области построения
+			if (this.config.showGrid)
+				createSVGNode("line", this.group, {
+					x1: x,
+					y1: 0,
+					y2: top + 4,
+					x2: x,
+					stroke: this.config.color,
+					"stroke-width": 1,
+					"shape-rendering": "crispEdges"
+				});
+
+			if (step == 1)
+			{
+				createSVGNode("text", this.group, {
+					x: x - labelWidth / 2 + marginLeft,  // чтобы подпись была выровнена посередите точки построения
+					y: top + 15,
+					style: fontSize
+				}).textContent = this.labels[i];
+			}
 			x += stepX;
+		}
+
+
+		if (step > 1)
+		{
+			//drawing not all labels
+			for (let i = this.labels.length - 1, index = 1; i >= 0; i -= step, index++)
+			{
+				let label = this.labels[i],
+					 x = width - index * (labelMargin + labelWidth);
+				if (x < 0)
+					break;
+				createSVGNode("text", this.group, {
+					x: x,
+					y: top + 15,
+					style: fontSize
+				}).textContent = label;
+			}
 		}
 	}
 
