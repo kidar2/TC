@@ -35,8 +35,8 @@ export const CHARTS_DATA = [
 			"x": "x"
 		},
 		"names": {
-			"y0": "#0",
-			"y1": "#1"
+			"y0": "Russia",
+			"y1": "USA"
 		},
 		"colors": {
 			"y0": "#3DC23F",

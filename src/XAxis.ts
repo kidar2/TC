@@ -24,7 +24,7 @@ const XAxisDefaultConfig: IXAxisConfig = {
 export default class XAxis {
 	config: IXAxisConfig;
 	parentNode: SVGElement;
-	group: SVGElement;
+	public group: SVGElement;
 	private labels: string[];
 	private labelScale: { x: number, label: string }[];
 
@@ -131,4 +131,36 @@ export default class XAxis {
 		return this.labelScale[index].x;
 	}
 
+	private getCategory(x: number)
+	{
+		if (this.labelScale[0].x > x)
+			return this.labelScale[0];
+
+		if (x > this.labelScale[this.labelScale.length - 1].x)
+			return this.labelScale[this.labelScale.length - 1];
+
+		for (let i = 1; i < this.labelScale.length; i++)
+		{
+			if (x > this.labelScale[i - 1].x && x <= this.labelScale[i].x)
+			{
+				if (Math.abs(x  - this.labelScale[i - 1].x) < Math.abs(x  - this.labelScale[i].x))
+				{
+					return this.labelScale[i - 1];
+				}
+
+				return this.labelScale[i];
+			}
+		}
+	}
+
+	public getLabelByX(x: number)
+	{
+		let res = this.getCategory(x);
+		return res && res.label;
+	}
+
+	public getIndexByX(x: number)
+	{
+		return this.labelScale.indexOf(this.getCategory(x));
+	}
 }

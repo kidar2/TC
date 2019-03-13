@@ -1,8 +1,9 @@
+
 .chart
 {
   position: relative;
   display: inline-block;
-  border: 1px solid black;
+  border: 1px solid #e0e0e0;
   user-select: none;
 
   &__title
@@ -10,20 +11,6 @@
 	 user-select: text;
   }
 }
-
-html, body
-{
-  height: 100%;
-  width: 100%;
-  padding: 0;
-  margin: 0;
-
-  .chart
-  {
-    margin: 20px 0 0 20px;
-  }
-}
-
 
 .calc-size-node
 {

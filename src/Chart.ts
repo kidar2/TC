@@ -1,8 +1,9 @@
-import './styles.scss';
+import './chart.scss';
 import YAxis, {IYAxisConfig} from "./YAxis";
 import XAxis, {IXAxisConfig} from "./XAxis";
 import {createNode, createSVGNode, IHash} from "./Util";
 import LineSeries from "./LineSeries";
+import Tooltip from "./Tooltip";
 
 
 export interface IChartData {
@@ -33,10 +34,11 @@ export default class Chart {
 	private titleNode: HTMLElement;
 	private yAxis: YAxis;
 	private xAxis: XAxis;
-	private Series: LineSeries[];
+	private series: LineSeries[];
 
 	private legendHeight: number;
 	private titleHeight: number;
+	private tooltip: Tooltip;
 
 
 	public constructor(config: IChartConfig)
@@ -66,7 +68,7 @@ export default class Chart {
 		this.svg.setAttribute("viewBox", "0 0 " + this.config.width + " " + (this.config.height - this.titleHeight));
 
 
-		this.Series = [];
+		this.series = [];
 		let min = Number.MAX_VALUE,
 			 max = Number.MIN_VALUE;
 
@@ -79,7 +81,7 @@ export default class Chart {
 			}
 			else
 			{
-				this.Series.push(new LineSeries({
+				this.series.push(new LineSeries({
 					data: c,
 					type: this.config.data.types[id],
 					name: this.config.data.names[id],
@@ -102,6 +104,34 @@ export default class Chart {
 
 		this.yAxis = new YAxis({min: min, max: max, ...this.config.yAxis}, this.chartArea);
 		this.setSize(this.config.width, this.config.height);
+		this.svg.addEventListener("mousemove", (e: MouseEvent) => this._onMouseMove(e));
+		this.svg.addEventListener("mouseout", () => this.tooltip.hide());
+
+		this.tooltip = new Tooltip(this.root);
+	}
+
+	_onMouseMove(e: MouseEvent)
+	{
+		let label = this.xAxis.getLabelByX(e.offsetX),
+			 valueIndex = this.xAxis.getIndexByX(e.offsetX);
+
+		if (!label)
+			this.tooltip.hide();
+		else
+		{
+			let seriesValues = [];
+			for (let i = 1; i < this.config.data.columns.length; i++)  //первая ось, это ось Y
+			{
+				let id = (this.config.data.columns[i] as any)[0];
+				seriesValues.push({
+					name: this.config.data.names[id],
+					value : this.config.data.columns[i][valueIndex],
+					color:  this.config.data.colors[id]
+				});
+			}
+
+			this.tooltip.show(e.offsetX, e.offsetY, seriesValues, label);
+		}
 	}
 
 	getPlotAreaHeight()
@@ -124,6 +154,6 @@ export default class Chart {
 		this.svg.style.height = (this.config.height - this.titleHeight) + 'px';
 		this.yAxis.update(this.getPlotAreaHeight(), this.config.width);
 		this.xAxis.update(this.getPlotAreaHeight(), this.config.width, this.yAxis.getWidth() + 10);
-		this.Series.forEach(s => s.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.yAxis, this.xAxis));
+		this.series.forEach(s => s.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.yAxis, this.xAxis));
 	}
 }
