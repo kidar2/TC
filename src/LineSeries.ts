@@ -23,6 +23,7 @@ export default class LineSeries {
 
 	public constructor(config: ISeriesConfig, parentNode: SVGElement)
 	{
+		this.visible = true;
 		this.config = config;
 		this.parentNode = parentNode;
 		this.id = config.data[0] as string;

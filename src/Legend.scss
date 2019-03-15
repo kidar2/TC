@@ -1,0 +1,28 @@
+@import './vars.scss';
+
+.chart__legend
+{
+  display: flex;
+  align-items: center;
+  top: -4px;
+  position: relative;
+
+  &__item
+  {
+	 border: 1px solid $main-color;
+	 border-radius: 13px;
+	 display: inline-block;
+	 padding: 5px 10px;
+	 cursor: pointer;
+
+	 &:hover
+	 {
+		background-color: $main-color;
+	 }
+  }
+
+  &__item + &__item
+  {
+	 margin-left: 15px;
+  }
+}

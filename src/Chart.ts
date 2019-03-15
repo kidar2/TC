@@ -4,6 +4,7 @@ import XAxis, {IXAxisConfig} from "./XAxis";
 import {createNode, createSVGNode, IHash} from "./Util";
 import LineSeries from "./LineSeries";
 import Tooltip from "./Tooltip";
+import Legend from "./Legend";
 
 
 export interface IChartData {
@@ -26,11 +27,10 @@ export interface IChartConfig {
 
 export default class Chart {
 
-	config: IChartConfig;
+	private config: IChartConfig;
 	private root: HTMLDivElement;
 	private svg: SVGSVGElement;
 	private chartArea: SVGElement;
-	private legendNode: SVGElement;
 	private titleNode: HTMLElement;
 	private yAxis: YAxis;
 	private xAxis: XAxis;
@@ -39,6 +39,7 @@ export default class Chart {
 	private legendHeight: number;
 	private titleHeight: number;
 	private tooltip: Tooltip;
+	private legend: Legend;
 
 
 	public constructor(config: IChartConfig)
@@ -106,6 +107,8 @@ export default class Chart {
 		this.svg.addEventListener("mouseout", () => this._hideToolTip());
 
 		this.tooltip = new Tooltip(this.root);
+		this.legend = new Legend(this.series, this.root, this.legendHeight, (serId: string) => this.onLegendItemClick(serId));
+		this.legend.update();
 	}
 
 	_hideToolTip()
@@ -143,6 +146,12 @@ export default class Chart {
 		}
 	}
 
+	onLegendItemClick(serId: string)
+	{
+		let s = this.series.find(s => s.id == serId);
+		s.setIsVisible(!s.visible);
+	}
+
 	getPlotAreaHeight()
 	{
 		return this.config.height - this.legendHeight - this.titleHeight;
@@ -159,9 +168,9 @@ export default class Chart {
 		this.config.height = height;
 		this.root.style.width = this.config.width + 'px';
 		this.root.style.height = this.config.height + 'px';
-		this.svg.setAttribute("viewBox", "0 0 " + this.config.width + " " + (this.config.height - this.titleHeight));
+		this.svg.setAttribute("viewBox", "0 0 " + this.config.width + " " + this.getPlotAreaHeight());
 		this.svg.style.width = this.config.width + 'px';
-		this.svg.style.height = (this.config.height - this.titleHeight) + 'px';
+		this.svg.style.height = this.getPlotAreaHeight() + 'px';
 		this.yAxis.update(this.getPlotAreaHeight(), this.config.width + 50);
 		this.xAxis.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.yAxis.getWidth());
 		this.series.forEach(s => s.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.yAxis, this.xAxis));
