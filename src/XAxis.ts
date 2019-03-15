@@ -26,7 +26,7 @@ const XAxisDefaultConfig: IXAxisConfig = {
 	type: CategoriesType.string,
 	fontSize: 11,
 	showGrid: true,
-	marginRight: 0
+	marginRight: 30
 };
 
 export default class XAxis {
@@ -63,9 +63,9 @@ export default class XAxis {
 		this.group = createSVGNode("g", this.parentNode, {type: "xAxis"});
 		this.labelScale = [];
 
-		width -= this.config.marginRight;
+		width -= this.config.marginRight + marginLeft;
 
-		let labelWidth = calcSize(this.labels).width,
+		let labelWidth = calcSize(this.labels, this.config.fontSize).width,
 			 labelMargin = 10,
 			 fontSize = `font-size: ${this.config.fontSize}px`,
 			 countView = width / (labelWidth + labelMargin);
@@ -78,9 +78,8 @@ export default class XAxis {
 			labelMargin = (width - labelWidth * this.labels.length) / (this.labels.length - 1);
 		}
 
-
 		let stepX = width / (this.labels.length - 1),
-			 x = labelWidth / 2;
+			 x = marginLeft + labelWidth / 2;
 
 		for (let i = 1; i < this.labels.length; i++)
 		{
@@ -101,7 +100,7 @@ export default class XAxis {
 			if (step == 1)
 			{
 				createSVGNode("text", this.group, {
-					x: x - labelWidth / 2 + marginLeft,  // чтобы подпись была выровнена посередите точки построения
+					x: x - labelWidth / 2,  // чтобы подпись была выровнена посередите точки построения
 					y: bottomPoint + 15,
 					style: fontSize
 				}).textContent = this.labels[i];
@@ -112,8 +111,9 @@ export default class XAxis {
 
 		if (step > 1)
 		{
+			labelMargin = (width + marginLeft - labelWidth * countView) / (countView - 1);
 			//drawing not all labels
-			for (let i = this.labels.length - 1, index = 1; i >= 0; i -= step, index++)
+			for (let i = this.labels.length - 1, index = 0; i >= 0; i -= step, index++)
 			{
 				let label = this.labels[i],
 					 x = width - index * (labelMargin + labelWidth);
