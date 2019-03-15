@@ -30,7 +30,7 @@ export default class Legend {
 		{
 			let item = document.createElement("div");
 			item.classList.add('chart__legend__item');
-			item.innerText = series.config.name;
+			item.innerHTML = `<span class="chart__legend__item__circle" style="background-color: ${series.config.color}"> </span> ${series.config.name}`;
 			item.setAttribute("series-id", series.id);
 			item.addEventListener('click', (e) => this.onClick(e));
 			this.root.appendChild(item);
@@ -40,6 +40,8 @@ export default class Legend {
 	onClick(e: MouseEvent)
 	{
 		let id = (e.target as HTMLElement).getAttribute("series-id");
+		if (!id)
+			id = ((e.target as HTMLElement).parentNode as HTMLElement).getAttribute("series-id");
 		if (this.itemClickCallback)
 			this.itemClickCallback(id);
 	}

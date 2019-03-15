@@ -14,8 +14,8 @@ export const CHARTS_DATA = [
 				"y0",
 				37,
 				20,
-				32,
-				39,
+				null,
+				60,
 				32,
 				35
 			],

@@ -150,6 +150,7 @@ export default class Chart {
 	{
 		let s = this.series.find(s => s.id == serId);
 		s.setIsVisible(!s.visible);
+		this.update();
 	}
 
 	getPlotAreaHeight()
@@ -171,6 +172,11 @@ export default class Chart {
 		this.svg.setAttribute("viewBox", "0 0 " + this.config.width + " " + this.getPlotAreaHeight());
 		this.svg.style.width = this.config.width + 'px';
 		this.svg.style.height = this.getPlotAreaHeight() + 'px';
+		this.update();
+	}
+
+	public update()
+	{
 		this.yAxis.update(this.getPlotAreaHeight(), this.config.width + 50);
 		this.xAxis.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.yAxis.getWidth());
 		this.series.forEach(s => s.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.yAxis, this.xAxis));

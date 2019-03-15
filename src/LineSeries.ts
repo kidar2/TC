@@ -41,41 +41,45 @@ export default class LineSeries {
 			this.nodes.forEach(n => removeNode(n));
 
 		this.nodes = [];
-		this.indexToPoint = {};
-		let points = "",
-			 topValue = yAxis.getTopValue();
-
-		for (let i = 1; i < this.config.data.length; i++)
+		if (this.visible)
 		{
-			let value = this.config.data[i] as number;
 
-			if (value != null)
+			this.indexToPoint = {};
+			let points = "",
+				 topValue = yAxis.getTopValue();
+
+			for (let i = 1; i < this.config.data.length; i++)
 			{
-				if (points)
-					points += ', ';
+				let value = this.config.data[i] as number;
 
-				let y = areaHeight - yAxis.calcHeightByValue(value, topValue);
-				points += xAxis.getXByIndex(i - 1) + " " + y;
+				if (value != null)
+				{
+					if (points)
+						points += ', ';
 
-				this.indexToPoint[i] = y;
+					let y = areaHeight - yAxis.calcHeightByValue(value, topValue);
+					points += xAxis.getXByIndex(i - 1) + " " + y;
+
+					this.indexToPoint[i] = y;
+				}
+				else if (points)
+				{
+					this.nodes.push(createSVGNode("polyline", this.parentNode, {
+						points,
+						fill: "transparent",
+						stroke: this.config.color
+					}));
+					points = "";
+				}
 			}
-			else if (points)
-			{
+
+			if (points)
 				this.nodes.push(createSVGNode("polyline", this.parentNode, {
 					points,
 					fill: "transparent",
 					stroke: this.config.color
 				}));
-				points = "";
-			}
 		}
-
-		if (points)
-			this.nodes.push(createSVGNode("polyline", this.parentNode, {
-				points,
-				fill: "transparent",
-				stroke: this.config.color
-			}));
 	}
 
 	setIsVisible(value: boolean)
