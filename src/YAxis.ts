@@ -17,7 +17,7 @@ const YAxisDefaultConfig: IYAxisConfig = {
 	max: 100,
 	color: "#e0e0e0",
 	gridColor: "#e0e0e0",
-	ticksCount: 10,
+	ticksCount: 5,
 	fontSize: 11,
 	showGrid: true,
 	lineVisible: false
@@ -54,7 +54,11 @@ export default class YAxis {
 	{
 		let countR = (this.config.min).toFixed(0).length - 1;
 
-		return Math.pow(10, countR) / 2;
+		let res = Math.pow(10, countR) / 2;
+		if (res < 10)
+			return 0;
+		else
+			return res;
 	}
 
 	public calcHeightByValue(y: number, topValue: number)
@@ -78,7 +82,7 @@ export default class YAxis {
 			 labels = [];
 
 		if (this.config.showGrid)
-			for (let y = topValue - step; y >= bottomValue; y -= step)
+			for (let y = bottomValue ; y <=topValue - step ; y += step)
 			{
 				let h = this.calcHeightByValue(y, topValue);
 
@@ -95,7 +99,7 @@ export default class YAxis {
 
 				let label = formatValue(y);
 				createSVGNode("text", this.group, {
-					x: 0,
+					x: 5,
 					y: height - h - 4,
 					style: `font-size: ${this.config.fontSize}px`
 				}).textContent = label;

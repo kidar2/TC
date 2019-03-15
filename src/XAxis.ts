@@ -11,6 +11,7 @@ export interface IXAxisConfig {
 	type?: CategoriesType;
 	fontSize?: number,
 	showGrid?: boolean;
+	marginRight?: number;
 }
 
 export interface ICategory {
@@ -24,7 +25,8 @@ const XAxisDefaultConfig: IXAxisConfig = {
 	lineVisible: true,
 	type: CategoriesType.string,
 	fontSize: 11,
-	showGrid: false
+	showGrid: true,
+	marginRight: 0
 };
 
 export default class XAxis {
@@ -40,7 +42,7 @@ export default class XAxis {
 		this.config = {...XAxisDefaultConfig, ...config};
 		this.parentNode = svgNode;
 		this.labels = new Array(this.config.categories.length - 1);
-		this.tooltipLine = createSVGNode("line", null,{stroke: this.config.color});
+		this.tooltipLine = createSVGNode("line", null, {stroke: this.config.color});
 		this.tooltipLine.classList.add('chart__tooltip-obj');
 
 		for (let i = 1; i < this.config.categories.length; i++)
@@ -61,16 +63,7 @@ export default class XAxis {
 		this.group = createSVGNode("g", this.parentNode, {type: "xAxis"});
 		this.labelScale = [];
 
-		// //линия самой оси
-		// createSVGNode("line", this.group, {
-		// 	x1: marginLeft,
-		// 	y1: top,
-		// 	y2: top,
-		// 	x2: width,
-		// 	stroke: this.config.color,
-		// 	"stroke-width": 1,
-		// 	"shape-rendering": "crispEdges"
-		// });
+		width -= this.config.marginRight;
 
 		let labelWidth = calcSize(this.labels).width,
 			 labelMargin = 10,

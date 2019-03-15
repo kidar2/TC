@@ -16,8 +16,9 @@ export default class LineSeries {
 	parentNode: SVGElement;
 	id: string;
 	nodes: SVGElement[];
-	private hoverCircle: SVGElement;
+	private readonly hoverCircle: SVGElement;
 	private indexToPoint: IHash<number>;
+	visible: boolean;
 
 
 	public constructor(config: ISeriesConfig, parentNode: SVGElement)
@@ -74,6 +75,15 @@ export default class LineSeries {
 				fill: "transparent",
 				stroke: this.config.color
 			}));
+	}
+
+	setIsVisible(value: boolean)
+	{
+		this.visible = value;
+		if (value)
+			this.nodes.forEach(n => this.parentNode.appendChild(n));
+		else
+			this.nodes.forEach(n => removeNode(n));
 	}
 
 	showToolTipPoint(category: ICategory)

@@ -162,8 +162,8 @@ export default class Chart {
 		this.svg.setAttribute("viewBox", "0 0 " + this.config.width + " " + (this.config.height - this.titleHeight));
 		this.svg.style.width = this.config.width + 'px';
 		this.svg.style.height = (this.config.height - this.titleHeight) + 'px';
-		this.yAxis.update(this.getPlotAreaHeight(), this.config.width);
-		this.xAxis.update(this.getPlotAreaHeight(), this.config.width, this.yAxis.getWidth() + 10);
+		this.yAxis.update(this.getPlotAreaHeight(), this.config.width + 50);
+		this.xAxis.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.yAxis.getWidth());
 		this.series.forEach(s => s.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.yAxis, this.xAxis));
 	}
 }
