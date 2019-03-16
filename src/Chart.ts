@@ -40,6 +40,8 @@ export default class Chart {
 	private titleHeight: number;
 	private tooltip: Tooltip;
 	private legend: Legend;
+	private min: number;
+	private max: number;
 
 
 	public constructor(config: IChartConfig)
@@ -68,8 +70,7 @@ export default class Chart {
 
 
 		this.series = [];
-		let min = Number.MAX_VALUE,
-			 max = Number.MIN_VALUE;
+
 
 		this.config.data.columns.forEach((c: Array<string | number>) =>
 		{
@@ -86,22 +87,11 @@ export default class Chart {
 					name: this.config.data.names[id],
 					color: this.config.data.colors[id]
 				}, this.chartArea));
-
-				for (let i = 1; i < c.length; i++)
-				{
-					if (c[i] != null)
-					{
-						if (c[i] > max)
-							max = c[i] as number;
-
-						if (c[i] < min)
-							min = c[i] as number;
-					}
-				}
 			}
 		});
 
-		this.yAxis = new YAxis({min: min, max: max, ...this.config.yAxis}, this.chartArea);
+		this.updateMinMax();
+		this.yAxis = new YAxis(this.config.yAxis, this.chartArea);
 		this.setSize(this.config.width, this.config.height);
 		this.svg.addEventListener("mousemove", (e: MouseEvent) => this._onMouseMove(e));
 		this.svg.addEventListener("mouseout", () => this._hideToolTip());
@@ -109,6 +99,33 @@ export default class Chart {
 		this.tooltip = new Tooltip(this.root);
 		this.legend = new Legend(this.series, this.root, this.legendHeight, (serId: string) => this.onLegendItemClick(serId));
 		this.legend.update();
+	}
+
+	public updateMinMax()
+	{
+		let min = Number.MAX_VALUE,
+			 max = Number.MIN_VALUE;
+
+		for (let i = 0; i < this.series.length; i++)
+		{
+			if (this.series[i].visible)
+			{
+				let data = this.series[i].config.data;
+				for (let j = 1; j < data.length; j++)
+				{
+					if (data[j] != null)
+					{
+						if (data[j] > max)
+							max = data[j] as number;
+
+						if (data[j] < min)
+							min = data[j] as number;
+					}
+				}
+			}
+		}
+		this.min = min;
+		this.max = max;
 	}
 
 	_hideToolTip()
@@ -133,18 +150,21 @@ export default class Chart {
 			for (let i = 1; i < this.config.data.columns.length; i++)  //first array is category axis
 			{
 				let id = (this.config.data.columns[i] as any)[0],
+					 series = this.series.find(s => s.id == id),
 					 value = this.config.data.columns[i][valueIndex];
-				if (value != null)
+				if (value != null && series.visible)
+				{
 					seriesValues.push({
 						name: this.config.data.names[id],
 						value: value,
 						color: this.config.data.colors[id]
 					});
+					series.showToolTipPoint(category)
+				}
 			}
 
 			this.tooltip.show(e.offsetX, e.offsetY + this.titleHeight, seriesValues, category.label);
 			this.xAxis.showTooltipLine(category, this.getPlotAreaHeight());
-			this.series.forEach(s => s.showToolTipPoint(category));
 		}
 	}
 
@@ -152,6 +172,7 @@ export default class Chart {
 	{
 		let s = this.series.find(s => s.id == serId);
 		s.setIsVisible(!s.visible);
+		this.updateMinMax();
 		this.update();
 	}
 
@@ -180,7 +201,7 @@ export default class Chart {
 
 	public update()
 	{
-		this.yAxis.update(this.getPlotAreaHeight(), this.config.width + 50);
+		this.yAxis.update(this.getPlotAreaHeight(), this.config.width + 50, this.min, this.max);
 		this.xAxis.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.yAxis.getWidth());
 		this.series.forEach(s => s.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.yAxis, this.xAxis));
 	}

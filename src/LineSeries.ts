@@ -43,7 +43,6 @@ export default class LineSeries {
 		this.nodes = [];
 		if (this.visible)
 		{
-
 			this.indexToPoint = {};
 			let points = "",
 				 topValue = yAxis.getTopValue();
@@ -93,7 +92,7 @@ export default class LineSeries {
 
 	showToolTipPoint(category: ICategory)
 	{
-		if (this.indexToPoint[category.index] != null)
+		if (this.indexToPoint[category.index] != null && this.visible)
 		{
 			if (!this.hoverCircle.parentNode)
 				this.parentNode.appendChild(this.hoverCircle);

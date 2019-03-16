@@ -1,8 +1,6 @@
 import {calcSize, createSVGNode, formatValue, removeNode} from "./Util";
 
 export interface IYAxisConfig {
-	min?: number;
-	max?: number;
 	color?: string;
 	gridColor?: string;
 	ticksCount?: number;
@@ -13,8 +11,6 @@ export interface IYAxisConfig {
 
 
 const YAxisDefaultConfig: IYAxisConfig = {
-	min: 0,
-	max: 100,
 	color: "#e0e0e0",
 	gridColor: "#e0e0e0",
 	ticksCount: 5,
@@ -29,7 +25,9 @@ export default class YAxis {
 	group: SVGElement;
 	marginLeft: number;
 	widthOfLabels: number;
-	private height: number;
+	height: number;
+	min: number;
+	max: number;
 
 	public constructor(config: IYAxisConfig, svgNode: SVGElement)
 	{
@@ -41,10 +39,10 @@ export default class YAxis {
 
 	public getTopValue()
 	{
-		let countR = (this.config.max).toFixed(0).length,
+		let countR = (this.max).toFixed(0).length,
 			 topValue = Math.pow(10, countR) / 2;
 
-		if (topValue < this.config.max)
+		if (topValue < this.max)
 			topValue *= 2;
 
 		return topValue;
@@ -52,7 +50,7 @@ export default class YAxis {
 
 	private getBottomValue()
 	{
-		let countR = (this.config.min).toFixed(0).length - 1;
+		let countR = (this.min).toFixed(0).length - 1;
 
 		let res = Math.pow(10, countR) / 2;
 		if (res < 10)
@@ -64,14 +62,15 @@ export default class YAxis {
 	public calcHeightByValue(y: number, topValue: number)
 	{
 		let perc = y / topValue;
-		return  perc * this.height;
+		return perc * this.height;
 	}
 
-	public update(height: number, width: number)
+	public update(height: number, width: number, min: number, max: number)
 	{
 		removeNode(this.group);
 		this.height = height;
-
+		this.min = min;
+		this.max = max;
 		this.group = createSVGNode("g", this.parentNode, {type: "yAxis"});
 
 
@@ -82,7 +81,7 @@ export default class YAxis {
 			 labels = [];
 
 		if (this.config.showGrid)
-			for (let y = bottomValue ; y <=topValue - step ; y += step)
+			for (let y = bottomValue; y <= topValue - step; y += step)
 			{
 				let h = this.calcHeightByValue(y, topValue);
 
