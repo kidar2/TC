@@ -93,10 +93,13 @@ export default class LineSeries {
 
 	showToolTipPoint(category: ICategory)
 	{
-		if (!this.hoverCircle.parentNode)
-			this.parentNode.appendChild(this.hoverCircle);
-		this.hoverCircle.setAttribute("cx", category.x + "");
-		this.hoverCircle.setAttribute("cy", this.indexToPoint[category.index] + "");
+		if (this.indexToPoint[category.index] != null)
+		{
+			if (!this.hoverCircle.parentNode)
+				this.parentNode.appendChild(this.hoverCircle);
+			this.hoverCircle.setAttribute("cx", category.x + "");
+			this.hoverCircle.setAttribute("cy", this.indexToPoint[category.index] + "");
+		}
 	}
 
 	hideToolTipPoint()

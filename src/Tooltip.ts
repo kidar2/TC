@@ -26,7 +26,7 @@ export default class Tooltip {
 		  seriesValues: { name: string, value: number, color: string }[],
 		  pointLabel: string)
 	{
-		this.node.style.left = x + 10 + 'px';  //чтобы не было наложения на курсор
+		this.node.style.left = x + 10 + 'px';  //+10 чтобы не было наложения на курсор
 		this.node.style.top = y + 'px';
 
 		if (this.currentLabel == pointLabel)

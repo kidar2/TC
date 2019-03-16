@@ -36,9 +36,11 @@ export default class XAxis {
 	private tooltipLine: SVGElement;
 	private labels: string[];
 	private labelScale: ICategory[];
+	public readonly LABEL_MARGIN_TOP: number;
 
 	public constructor(config: IXAxisConfig, svgNode: SVGElement)
 	{
+		this.LABEL_MARGIN_TOP = 15;
 		this.config = {...XAxisDefaultConfig, ...config};
 		this.parentNode = svgNode;
 		this.labels = new Array(this.config.categories.length - 1);
@@ -62,6 +64,7 @@ export default class XAxis {
 		removeNode(this.group);
 		this.group = createSVGNode("g", this.parentNode, {type: "xAxis"});
 		this.labelScale = [];
+
 
 		width -= this.config.marginRight + marginLeft;
 
@@ -101,7 +104,7 @@ export default class XAxis {
 			{
 				createSVGNode("text", this.group, {
 					x: x - labelWidth / 2,  // чтобы подпись была выровнена посередите точки построения
-					y: bottomPoint + 15,
+					y: bottomPoint + this.LABEL_MARGIN_TOP,
 					style: fontSize
 				}).textContent = this.labels[i];
 			}
@@ -121,7 +124,7 @@ export default class XAxis {
 					break;
 				createSVGNode("text", this.group, {
 					x: x,
-					y: bottomPoint + 15,
+					y: bottomPoint + this.LABEL_MARGIN_TOP,
 					style: fontSize
 				}).textContent = label;
 			}
@@ -178,6 +181,6 @@ export default class XAxis {
 
 	public getIndexOfCategory(x: ICategory)
 	{
-		return this.labelScale.indexOf(x);
+		return this.labelScale.indexOf(x) + 1;
 	}
 }

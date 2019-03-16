@@ -132,12 +132,14 @@ export default class Chart {
 			let seriesValues = [];
 			for (let i = 1; i < this.config.data.columns.length; i++)  //first array is category axis
 			{
-				let id = (this.config.data.columns[i] as any)[0];
-				seriesValues.push({
-					name: this.config.data.names[id],
-					value: this.config.data.columns[i][valueIndex],
-					color: this.config.data.colors[id]
-				});
+				let id = (this.config.data.columns[i] as any)[0],
+					 value = this.config.data.columns[i][valueIndex];
+				if (value != null)
+					seriesValues.push({
+						name: this.config.data.names[id],
+						value: value,
+						color: this.config.data.colors[id]
+					});
 			}
 
 			this.tooltip.show(e.offsetX, e.offsetY + this.titleHeight, seriesValues, category.label);
@@ -155,7 +157,7 @@ export default class Chart {
 
 	getPlotAreaHeight()
 	{
-		return this.config.height - this.legendHeight - this.titleHeight;
+		return this.config.height - this.legendHeight - this.titleHeight - this.xAxis.LABEL_MARGIN_TOP;
 	}
 
 	getPlotAreaWidth()
@@ -169,9 +171,10 @@ export default class Chart {
 		this.config.height = height;
 		this.root.style.width = this.config.width + 'px';
 		this.root.style.height = this.config.height + 'px';
-		this.svg.setAttribute("viewBox", "0 0 " + this.config.width + " " + this.getPlotAreaHeight());
+		let svgHeight = (this.config.height - this.legendHeight - this.titleHeight);
+		this.svg.setAttribute("viewBox", "0 0 " + this.config.width + " " + svgHeight);
 		this.svg.style.width = this.config.width + 'px';
-		this.svg.style.height = this.getPlotAreaHeight() + 'px';
+		this.svg.style.height = svgHeight + 'px';
 		this.update();
 	}
 
