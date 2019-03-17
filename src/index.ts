@@ -9,7 +9,7 @@ function main()
 		 h = Math.max(document.body.offsetHeight - 300, 300),
 		 charts: Chart[] = [];
 
-	CHARTS_DATA.forEach(data =>
+	CHARTS_DATA.forEach((data, index) =>
 	{
 		charts.push(new Chart({
 			data: data as any,
@@ -21,7 +21,7 @@ function main()
 				type: CategoriesType.date,
 				showGrid: true
 			},
-			title: "Telegram data",
+			title: `Chart ${index + 1}`,
 			width: w,
 			height: h
 		}));

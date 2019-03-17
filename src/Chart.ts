@@ -222,11 +222,10 @@ export default class Chart {
 
 		this.series.forEach(s => s.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.yAxis, this.xAxis));
 		if (!this.xAxis.allLabelsVisible)
-			this.scrollBox.update(this.config.width, this.scrollBoxHeight, "0 0 " + this.config.width + " " + this.getSVGNodeHeight());
+			this.scrollBox.update(this.config.width,
+				 this.scrollBoxHeight,
+				 "0 0 " + this.config.width + " " + this.getSVGNodeHeight());
 		else
-		{
-			//this.yAxis.update(this.getPlotAreaHeight(), this.config.width + 50, this.min, this.max);
 			this.scrollBox.hide();
-		}
 	}
 }
