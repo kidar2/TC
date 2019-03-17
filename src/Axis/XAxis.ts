@@ -42,15 +42,18 @@ export default class XAxis {
 	private countView: number;     //расчитанное число возможных подписей для отображения
 	private labelMargin: number;   //отступ между подписями по умолчанию
 
+	DEFAULT_LABEL_MARGIN: number;
+
 	public constructor(config: IXAxisConfig, svgNode: SVGElement)
 	{
+		this.DEFAULT_LABEL_MARGIN = 10;
 		this.LABEL_MARGIN_TOP = 15;
 		this.config = {...XAxisDefaultConfig, ...config};
 		this.parentNode = svgNode;
 		this.labels = new Array(this.config.categories.length - 1);
 		this.tooltipLine = createSVGNode("line", null, {stroke: this.config.color});
 		this.tooltipLine.classList.add('chart__tooltip-obj');
-		this.labelMargin = 10;
+		this.labelMargin = this.DEFAULT_LABEL_MARGIN;
 		for (let i = 1; i < this.config.categories.length; i++)
 		{
 			if (this.config.type == CategoriesType.date)
@@ -65,6 +68,7 @@ export default class XAxis {
 
 	public prepare(width: number, marginLeft: number)
 	{
+		this.labelMargin = this.DEFAULT_LABEL_MARGIN;
 		width -= this.config.marginRight + marginLeft;
 		if (this.labelWidth == null)
 			this.labelWidth = calcSize(this.labels, this.config.fontSize).width;
@@ -97,6 +101,7 @@ export default class XAxis {
 			this.labelMargin = (width - this.labelWidth * this.labels.length) / (this.labels.length - 1);
 		}
 
+
 		let stepX = width / (this.labels.length - 1),
 			 x = marginLeft + this.labelWidth / 2;
 
@@ -128,7 +133,7 @@ export default class XAxis {
 		}
 
 
-		if (step > 1)
+		if (step > 1 && this.countView > 2)
 		{
 			this.labelMargin = (width + marginLeft - this.labelWidth * this.countView) / (this.countView - 1);
 			//drawing not all labels
