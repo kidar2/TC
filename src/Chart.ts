@@ -171,7 +171,7 @@ export default class Chart {
 			}
 
 			this.tooltip.show(e.offsetX, e.offsetY + this.titleHeight, seriesValues, category.label);
-			this.xAxis.showTooltipLine(category, this.getPlotAreaHeight());
+			this.xAxis.showTooltipLine(category, this.yAxis.heightOfLabels, this.getPlotAreaHeight());
 		}
 	}
 
@@ -218,7 +218,7 @@ export default class Chart {
 		this.xAxis.prepare(this.getPlotAreaWidth(), this.yAxis.getWidth());
 
 		this.yAxis.update(this.getPlotAreaHeight(), this.config.width + 50);
-		this.xAxis.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.yAxis.getWidth());
+		this.xAxis.update(this.getPlotAreaHeight(), this.yAxis.heightOfLabels, this.getPlotAreaWidth(), this.yAxis.getWidth());
 
 		this.series.forEach(s => s.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.yAxis, this.xAxis));
 		if (!this.xAxis.allLabelsVisible)

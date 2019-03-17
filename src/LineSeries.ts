@@ -45,7 +45,8 @@ export default class LineSeries {
 		{
 			this.indexToPoint = {};
 			let points = "",
-				 topValue = yAxis.getTopValue();
+				 topValue = yAxis.getTopValue(),
+				 bottomValue = yAxis.getBottomValue();
 
 			for (let i = 1; i < this.config.data.length; i++)
 			{
@@ -56,7 +57,7 @@ export default class LineSeries {
 					if (points)
 						points += ', ';
 
-					let y = areaHeight - yAxis.calcHeightByValue(value, topValue);
+					let y = areaHeight - yAxis.calcHeightByValue(value, topValue, bottomValue);
 					points += xAxis.getXByIndex(i - 1) + " " + y;
 
 					this.indexToPoint[i] = y;

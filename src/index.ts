@@ -19,7 +19,7 @@ function main()
 			},
 			xAxis: {
 				type: CategoriesType.date,
-				showGrid: true
+				showGrid: false
 			},
 			title: `Chart ${index + 1}`,
 			width: w,

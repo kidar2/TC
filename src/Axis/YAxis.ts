@@ -25,6 +25,7 @@ export default class YAxis {
 	group: SVGElement;
 	marginLeft: number;
 	widthOfLabels: number;
+	heightOfLabels: number;
 	height: number;
 	min: number;
 	max: number;
@@ -48,19 +49,35 @@ export default class YAxis {
 		return topValue;
 	}
 
-	private getBottomValue()
+	public getBottomValue()
 	{
 		let countR = (this.min).toFixed(0).length - 1;
 
 		let res = Math.pow(10, countR) / 2;
-		if (res < 10)
-			return 0;
+
+		if (this.min >= 0)
+		{
+			if (res < 10)
+				return 0;
+			else
+				return res;
+		}
 		else
+		{
+			res = -res;
+			if (res > this.min)
+				res *= 2;
 			return res;
+		}
 	}
 
-	public calcHeightByValue(y: number, topValue: number)
+	public calcHeightByValue(y: number, topValue: number, bottomValue: number)
 	{
+		if (bottomValue < 0)
+		{
+			y += Math.abs(bottomValue);
+			topValue += Math.abs(bottomValue);
+		}
 		let perc = y / topValue;
 		return perc * this.height;
 	}
@@ -80,13 +97,14 @@ export default class YAxis {
 				labels.push(formatValue(y));
 
 			this.widthOfLabels = calcSize(labels, this.config.fontSize).width;
+			this.heightOfLabels = calcSize([formatValue(topValue)], this.config.fontSize).height
 		}
 	}
 
 	public update(height: number, width: number)
 	{
 		removeNode(this.group);
-		this.height = height;
+		this.height = height - this.heightOfLabels;
 
 		this.group = createSVGNode("g", this.parentNode, {type: "yAxis"});
 
@@ -97,15 +115,16 @@ export default class YAxis {
 			 step = Math.round(Math.abs((topValue - bottomValue) / ticksCount)),
 			 labels = [];
 
-		for (let y = bottomValue; y <= topValue - step; y += step)
+
+		for (let y = bottomValue; y <= topValue; y += step)
 		{
-			let h = this.calcHeightByValue(y, topValue);
+			let h = this.calcHeightByValue(y, topValue, bottomValue) - this.heightOfLabels;
 
 			if (this.config.showGrid)
 				createSVGNode("line", this.group, {
 					x1: 0,
-					y1: height - h,
-					y2: height - h,
+					y1: this.height - h,
+					y2: this.height - h,
 					x2: width,
 					stroke: this.config.color,
 					"stroke-width": 1,
@@ -115,7 +134,7 @@ export default class YAxis {
 			let label = formatValue(y);
 			createSVGNode("text", this.group, {
 				x: 5,
-				y: height - h - 4,
+				y: this.height - h - 4,
 				style: `font-size: ${this.config.fontSize}px`
 			}).textContent = label;
 
@@ -127,7 +146,7 @@ export default class YAxis {
 			createSVGNode("line", this.group, {
 				x1: this.widthOfLabels + 5,
 				y1: 0,
-				y2: height,
+				y2: this.height,
 				x2: this.widthOfLabels + 5,
 				stroke: this.config.color,
 				"stroke-width": 1,

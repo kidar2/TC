@@ -78,7 +78,7 @@ export default class XAxis {
 	}
 
 
-	public update(bottomPoint: number, width: number, marginLeft: number)
+	public update(bottomPoint: number, topPoint: number, width: number, marginLeft: number)
 	{
 		removeNode(this.group);
 		this.group = createSVGNode("g", this.parentNode, {type: "xAxis"});
@@ -108,7 +108,7 @@ export default class XAxis {
 			if (this.config.showGrid)
 				createSVGNode("line", this.group, {
 					x1: x,
-					y1: 0,
+					y1: topPoint,
 					y2: bottomPoint,
 					x2: x,
 					stroke: this.config.color,
@@ -147,13 +147,13 @@ export default class XAxis {
 		}
 	}
 
-	public showTooltipLine(category: ICategory, bottomPoint: number)
+	public showTooltipLine(category: ICategory, topPoint: number, bottomPoint: number)
 	{
 		if (!this.tooltipLine.parentNode)
 			this.group.appendChild(this.tooltipLine);
 		this.tooltipLine.setAttribute("x1", category.x + "");
 		this.tooltipLine.setAttribute("x2", category.x + "");
-		this.tooltipLine.setAttribute("y1", "0");
+		this.tooltipLine.setAttribute("y1", topPoint + "");
 		this.tooltipLine.setAttribute("y2", bottomPoint + "");
 	}
 
