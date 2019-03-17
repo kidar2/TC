@@ -65,12 +65,29 @@ export default class YAxis {
 		return perc * this.height;
 	}
 
-	public update(height: number, width: number, min: number, max: number)
+	public prepare(min: number, max: number)
+	{
+		this.min = min;
+		this.max = max;
+		if (this.widthOfLabels == null)
+		{
+			let topValue = this.getTopValue(),
+				 bottomValue = this.getBottomValue(),
+				 step = Math.round(Math.abs((topValue - bottomValue) / this.config.ticksCount)),
+				 labels = [];
+
+			for (let y = bottomValue; y <= topValue - step; y += step)
+				labels.push(formatValue(y));
+
+			this.widthOfLabels = calcSize(labels, this.config.fontSize).width;
+		}
+	}
+
+	public update(height: number, width: number)
 	{
 		removeNode(this.group);
 		this.height = height;
-		this.min = min;
-		this.max = max;
+
 		this.group = createSVGNode("g", this.parentNode, {type: "yAxis"});
 
 
@@ -80,33 +97,31 @@ export default class YAxis {
 			 step = Math.round(Math.abs((topValue - bottomValue) / ticksCount)),
 			 labels = [];
 
-		if (this.config.showGrid)
-			for (let y = bottomValue; y <= topValue - step; y += step)
-			{
-				let h = this.calcHeightByValue(y, topValue);
+		for (let y = bottomValue; y <= topValue - step; y += step)
+		{
+			let h = this.calcHeightByValue(y, topValue);
 
-				if (this.config.showGrid)
-					createSVGNode("line", this.group, {
-						x1: 0,
-						y1: height - h,
-						y2: height - h,
-						x2: width,
-						stroke: this.config.color,
-						"stroke-width": 1,
-						"shape-rendering": "crispEdges"
-					});
+			if (this.config.showGrid)
+				createSVGNode("line", this.group, {
+					x1: 0,
+					y1: height - h,
+					y2: height - h,
+					x2: width,
+					stroke: this.config.color,
+					"stroke-width": 1,
+					"shape-rendering": "crispEdges"
+				});
 
-				let label = formatValue(y);
-				createSVGNode("text", this.group, {
-					x: 5,
-					y: height - h - 4,
-					style: `font-size: ${this.config.fontSize}px`
-				}).textContent = label;
+			let label = formatValue(y);
+			createSVGNode("text", this.group, {
+				x: 5,
+				y: height - h - 4,
+				style: `font-size: ${this.config.fontSize}px`
+			}).textContent = label;
 
-				labels.push(label);
-			}
+			labels.push(label);
+		}
 
-		this.widthOfLabels = calcSize(labels, this.config.fontSize).width;
 
 		if (this.config.lineVisible)
 			createSVGNode("line", this.group, {

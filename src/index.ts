@@ -18,7 +18,8 @@ function main()
 				showGrid: true
 			},
 			xAxis: {
-				type: CategoriesType.date
+				type: CategoriesType.date,
+				showGrid: true
 			},
 			title: "Telegram data",
 			width: w,

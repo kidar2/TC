@@ -5,6 +5,7 @@ import {createNode, createSVGNode, IHash} from "./Util";
 import LineSeries from "./LineSeries";
 import Tooltip from "./Tooltip";
 import Legend from "./Legend";
+import ScrollBox from "./ScrollBox/ScrollBox";
 
 
 export interface IChartData {
@@ -37,17 +38,20 @@ export default class Chart {
 	private series: LineSeries[];
 
 	private legendHeight: number;
+	private scrollBoxHeight: number;
 	private titleHeight: number;
 	private tooltip: Tooltip;
 	private legend: Legend;
 	private min: number;
 	private max: number;
+	private scrollBox: ScrollBox;
 
 
 	public constructor(config: IChartConfig)
 	{
 		this.config = config;
 		this.legendHeight = 50;
+		this.scrollBoxHeight = 50;
 		this.titleHeight = 0;
 		this.render();
 	}
@@ -92,6 +96,8 @@ export default class Chart {
 
 		this.updateMinMax();
 		this.yAxis = new YAxis(this.config.yAxis, this.chartArea);
+		this.scrollBox = new ScrollBox(this.root, this.svg);
+
 		this.setSize(this.config.width, this.config.height);
 		this.svg.addEventListener("mousemove", (e: MouseEvent) => this._onMouseMove(e));
 		this.svg.addEventListener("mouseout", () => this._hideToolTip());
@@ -99,6 +105,7 @@ export default class Chart {
 		this.tooltip = new Tooltip(this.root);
 		this.legend = new Legend(this.series, this.root, this.legendHeight, (serId: string) => this.onLegendItemClick(serId));
 		this.legend.update();
+
 	}
 
 	public updateMinMax()
@@ -178,7 +185,12 @@ export default class Chart {
 
 	getPlotAreaHeight()
 	{
-		return this.config.height - this.legendHeight - this.titleHeight - this.xAxis.LABEL_MARGIN_TOP;
+		return this.config.height - this.legendHeight - this.titleHeight - this.xAxis.LABEL_MARGIN_TOP - (this.xAxis.allLabelsVisible ? 0 : this.scrollBoxHeight);
+	}
+
+	getSVGNodeHeight()
+	{
+		return this.config.height - this.legendHeight - this.titleHeight - (this.xAxis.allLabelsVisible ? 0 : this.scrollBoxHeight);
 	}
 
 	getPlotAreaWidth()
@@ -192,17 +204,29 @@ export default class Chart {
 		this.config.height = height;
 		this.root.style.width = this.config.width + 'px';
 		this.root.style.height = this.config.height + 'px';
-		let svgHeight = (this.config.height - this.legendHeight - this.titleHeight);
+		this.update();
+
+		let svgHeight = this.getSVGNodeHeight();
 		this.svg.setAttribute("viewBox", "0 0 " + this.config.width + " " + svgHeight);
 		this.svg.style.width = this.config.width + 'px';
 		this.svg.style.height = svgHeight + 'px';
-		this.update();
 	}
 
 	public update()
 	{
-		this.yAxis.update(this.getPlotAreaHeight(), this.config.width + 50, this.min, this.max);
+		this.yAxis.prepare(this.min, this.max);
+		this.xAxis.prepare(this.getPlotAreaWidth(), this.yAxis.getWidth());
+
+		this.yAxis.update(this.getPlotAreaHeight(), this.config.width + 50);
 		this.xAxis.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.yAxis.getWidth());
+
 		this.series.forEach(s => s.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.yAxis, this.xAxis));
+		if (!this.xAxis.allLabelsVisible)
+			this.scrollBox.update(this.config.width, this.scrollBoxHeight, "0 0 " + this.config.width + " " + this.getSVGNodeHeight());
+		else
+		{
+			//this.yAxis.update(this.getPlotAreaHeight(), this.config.width + 50, this.min, this.max);
+			this.scrollBox.hide();
+		}
 	}
 }

@@ -37,6 +37,10 @@ export default class XAxis {
 	private labels: string[];
 	private labelScale: ICategory[];
 	public readonly LABEL_MARGIN_TOP: number;
+	public allLabelsVisible: boolean;
+	private labelWidth: number;
+	private countView: number;     //расчитанное число возможных подписей для отображения
+	private labelMargin: number;   //отступ между подписями по умолчанию
 
 	public constructor(config: IXAxisConfig, svgNode: SVGElement)
 	{
@@ -46,7 +50,7 @@ export default class XAxis {
 		this.labels = new Array(this.config.categories.length - 1);
 		this.tooltipLine = createSVGNode("line", null, {stroke: this.config.color});
 		this.tooltipLine.classList.add('chart__tooltip-obj');
-
+		this.labelMargin = 10;
 		for (let i = 1; i < this.config.categories.length; i++)
 		{
 			if (this.config.type == CategoriesType.date)
@@ -59,6 +63,21 @@ export default class XAxis {
 		}
 	}
 
+	public prepare(width: number, marginLeft: number)
+	{
+		width -= this.config.marginRight + marginLeft;
+		if (this.labelWidth == null)
+			this.labelWidth = calcSize(this.labels, this.config.fontSize).width;
+		this.countView = width / (this.labelWidth + this.labelMargin);
+		this.allLabelsVisible = this.calcStep() <= 1;
+	}
+
+	calcStep()
+	{
+		return Math.round(this.labels.length / this.countView);
+	}
+
+
 	public update(bottomPoint: number, width: number, marginLeft: number)
 	{
 		removeNode(this.group);
@@ -68,21 +87,18 @@ export default class XAxis {
 
 		width -= this.config.marginRight + marginLeft;
 
-		let labelWidth = calcSize(this.labels, this.config.fontSize).width,
-			 labelMargin = 10,
-			 fontSize = `font-size: ${this.config.fontSize}px`,
-			 countView = width / (labelWidth + labelMargin);
+		let fontSize = `font-size: ${this.config.fontSize}px`,
+			 step = this.calcStep();
 
-		let step = Math.round(this.labels.length / countView);
 		if (step <= 1)
 		{
 			//значит можно отрисовать все подписи
 			step = 1;
-			labelMargin = (width - labelWidth * this.labels.length) / (this.labels.length - 1);
+			this.labelMargin = (width - this.labelWidth * this.labels.length) / (this.labels.length - 1);
 		}
 
 		let stepX = width / (this.labels.length - 1),
-			 x = marginLeft + labelWidth / 2;
+			 x = marginLeft + this.labelWidth / 2;
 
 		for (let i = 1; i < this.labels.length; i++)
 		{
@@ -103,7 +119,7 @@ export default class XAxis {
 			if (step == 1)
 			{
 				createSVGNode("text", this.group, {
-					x: x - labelWidth / 2,  // чтобы подпись была выровнена посередите точки построения
+					x: x - this.labelWidth / 2,  // чтобы подпись была выровнена посередите точки построения
 					y: bottomPoint + this.LABEL_MARGIN_TOP,
 					style: fontSize
 				}).textContent = this.labels[i];
@@ -114,12 +130,12 @@ export default class XAxis {
 
 		if (step > 1)
 		{
-			labelMargin = (width + marginLeft - labelWidth * countView) / (countView - 1);
+			this.labelMargin = (width + marginLeft - this.labelWidth * this.countView) / (this.countView - 1);
 			//drawing not all labels
 			for (let i = this.labels.length - 1, index = 0; i >= 0; i -= step, index++)
 			{
 				let label = this.labels[i],
-					 x = width - index * (labelMargin + labelWidth);
+					 x = width - index * (this.labelMargin + this.labelWidth);
 				if (x < 0)
 					break;
 				createSVGNode("text", this.group, {
