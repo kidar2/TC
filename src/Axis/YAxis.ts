@@ -1,4 +1,4 @@
-import {calcSize, createSVGNode, formatValue, removeNode} from "./Util";
+import {calcSize, createSVGNode, formatValue, removeNode} from "../Util";
 
 export interface IYAxisConfig {
 	color?: string;

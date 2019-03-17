@@ -1,7 +1,7 @@
 import './index.scss';
 import Chart from "./Chart";
 import {CHARTS_DATA} from "./ChartData";
-import {CategoriesType} from "./XAxis";
+import {CategoriesType} from "./Axis/XAxis";
 
 function main()
 {

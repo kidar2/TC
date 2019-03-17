@@ -1,5 +1,5 @@
 import './tooltip.scss';
-import {removeNode} from "./Util";
+import {removeNode} from "./../Util";
 
 export default class Tooltip {
 

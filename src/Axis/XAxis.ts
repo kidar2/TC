@@ -1,4 +1,4 @@
-import {calcSize, createSVGNode, formatDate, removeNode} from "./Util";
+import {calcSize, createSVGNode, formatDate, removeNode} from "../Util";
 
 export enum CategoriesType {
 	date, string

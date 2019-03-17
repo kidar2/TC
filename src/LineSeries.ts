@@ -1,6 +1,6 @@
-import YAxis from "./YAxis";
+import YAxis from "./Axis/YAxis";
 import {createSVGNode, IHash, removeNode} from "./Util";
-import XAxis, {ICategory} from "./XAxis";
+import XAxis, {ICategory} from "./Axis/XAxis";
 
 interface ISeriesConfig {
 	data: Array<string | number>;

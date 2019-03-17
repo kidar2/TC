@@ -9,6 +9,12 @@ export default class ScrollBox {
 	originalSVGNode: SVGSVGElement;
 	seriesGroup: SVGElement;
 	private scrollNode: HTMLElement;
+	private leftResizer: HTMLElement;
+	private rightResizer: HTMLElement;
+	private leftPosition: number;
+	private rightPosition: number;
+	private leftNode: HTMLElement;
+	private rightNode: HTMLElement;
 
 	constructor(parentNode: HTMLElement, svgNode: SVGSVGElement)
 	{
@@ -29,6 +35,10 @@ export default class ScrollBox {
 		this.svg = this.root.querySelector('svg');
 		this.seriesGroup = this.svg.querySelector('g');
 		this.scrollNode = this.root.querySelector('.chart__scroll');
+		this.leftResizer = this.root.querySelector('.chart__scroll-left-resizer');
+		this.rightResizer = this.root.querySelector('.chart__scroll-right-resizer');
+		this.leftNode = this.root.querySelector('.chart__scroll-left');
+		this.rightNode = this.root.querySelector('.chart__scroll-right');
 	}
 
 	update(width: number, height: number, viewBox: string)
@@ -45,7 +55,18 @@ export default class ScrollBox {
 
 		this.scrollNode.style.width = width + 'px';
 		this.scrollNode.style.height = height + 'px';
+
+		if (this.leftPosition == null)
+		{
+			this.leftNode.style.width = '0px';
+		}
+
+		if (this.rightPosition == null)
+		{
+			this.rightNode.style.width = '0px';
+		}
 	}
+
 
 	hide()
 	{

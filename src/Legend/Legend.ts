@@ -1,5 +1,5 @@
 import './Legend.scss';
-import LineSeries from "./LineSeries";
+import LineSeries from "./../LineSeries";
 
 
 export default class Legend {

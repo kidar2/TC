@@ -1,10 +1,10 @@
 import './chart.scss';
-import YAxis, {IYAxisConfig} from "./YAxis";
-import XAxis, {IXAxisConfig} from "./XAxis";
+import YAxis, {IYAxisConfig} from "./Axis/YAxis";
+import XAxis, {IXAxisConfig} from "./Axis/XAxis";
 import {createNode, createSVGNode, IHash} from "./Util";
 import LineSeries from "./LineSeries";
-import Tooltip from "./Tooltip";
-import Legend from "./Legend";
+import Tooltip from "./ToolTip/Tooltip";
+import Legend from "./Legend/Legend";
 import ScrollBox from "./ScrollBox/ScrollBox";
 
 
