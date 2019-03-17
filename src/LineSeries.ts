@@ -67,7 +67,8 @@ export default class LineSeries {
 					this.nodes.push(createSVGNode("polyline", this.parentNode, {
 						points,
 						fill: "transparent",
-						stroke: this.config.color
+						stroke: this.config.color,
+						'stroke-width': '2'
 					}));
 					points = "";
 				}
@@ -77,7 +78,8 @@ export default class LineSeries {
 				this.nodes.push(createSVGNode("polyline", this.parentNode, {
 					points,
 					fill: "transparent",
-					stroke: this.config.color
+					stroke: this.config.color,
+					'stroke-width': '2'
 				}));
 		}
 	}

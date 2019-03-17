@@ -73,8 +73,11 @@ export default class ScrollBox {
 		this.seriesGroup.innerHTML = '';
 		let nodes = this.originalSVGNode.querySelectorAll('polyline');
 		for (let i = 0; i < nodes.length; i++)
-			this.seriesGroup.appendChild(nodes.item(i).cloneNode());
-
+		{
+			let polilyne = nodes.item(i).cloneNode() as SVGElement;
+			polilyne.setAttribute('stroke-width', '1');
+			this.seriesGroup.appendChild(polilyne);
+		}
 		this.svg.style.width = width + 'px';
 		this.svg.style.height = height + 'px';
 		this.svg.setAttribute("viewBox", viewBox);
