@@ -145,7 +145,7 @@ export default class XAxis {
 				 startIndex = this.labels.length - 1,
 				 endIndex = 0;
 
-			if (startScrollPosition && endScrollPosition)
+			if (startScrollPosition || endScrollPosition)
 			{
 				if (startScrollPosition)
 					endIndex = this.labelScale.indexOf(this.getCategory(startScrollPosition));
@@ -162,6 +162,8 @@ export default class XAxis {
 				}
 				else
 					step = Math.round(step);
+
+				//console.log(`from ${endIndex} to ${startIndex} step=${step}`);
 			}
 
 			this.labelMargin = (width + marginLeft - this.labelWidth * labelsCount) / (labelsCount - 1);

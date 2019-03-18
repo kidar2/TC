@@ -29,7 +29,7 @@ export default class ScrollBox {
 	/**
 	 *
 	 * @param parentNode node for render
-	 * @param svgNode  svg node width chart
+	 * @param svgNode  svg node with chart
 	 * @param changedCallback call when scroll was changed
 	 */
 	constructor(parentNode: HTMLElement,
@@ -135,27 +135,47 @@ export default class ScrollBox {
 		let position = e.x - this.rectSereies.left;
 		if (this.resizingNode == this.leftNode)
 		{
-			this.leftWidth = position;
-			this.leftNode.style.width = position + 'px';
+			if (this.checkMinSize(position, this.rightWidth))
+			{
+				this.leftWidth = position;
+				this.leftNode.style.width = position + 'px';
+			}
 		}
 		else if (this.resizingNode == this.rightNode)
 		{
-			this.rightWidth = this.rectSereies.width - position;
-			this.rightNode.style.width = this.rightWidth + 'px';
+			let w = this.rectSereies.width - position;
+			if (this.checkMinSize(this.leftWidth, w))
+			{
+				this.rightWidth = w;
+				this.rightNode.style.width = this.rightWidth + 'px';
+			}
 		}
 		else
 		{
 			//simple move of center node
-			position -= this.centerOffsetX;
-			let rightw = this.rectSereies.width - position - this.centerWidth;
+			position -= this.centerOffsetX + 5;
+			let rightw = this.rectSereies.width - position - this.centerWidth - 10;   //it'ts width of resizers;
+
 			if (position >= 0 && rightw >= 0)
 			{
 				this.leftWidth = position;
 				this.rightWidth = rightw;
+
 				this.leftNode.style.width = this.leftWidth + 'px';
 				this.rightNode.style.width = this.rightWidth + 'px';
 			}
 		}
+	}
+
+	private checkMinSize(newLeftWidth: number, newRightWidth: number)
+	{
+		if (!this.leftWidth || !this.rightWidth)
+			return true;
+
+		if (newLeftWidth < 0 || newRightWidth < 0)
+			return false;
+
+		return parseInt(this.scrollNode.style.width) - (newRightWidth + newLeftWidth) >= 50;
 	}
 
 	public getLeftPosition()
@@ -167,13 +187,6 @@ export default class ScrollBox {
 	{
 		return this.rightNode.style.width ? parseInt(this.scrollNode.style.width) - parseInt(this.rightNode.style.width) : null;
 	}
-
-	public getScale()
-	{
-		let widthOfView = this.getRightPosition() - this.getLeftPosition();
-		return parseInt(this.scrollNode.style.width) / widthOfView;
-	}
-
 
 	public hide()
 	{
