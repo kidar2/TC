@@ -39,10 +39,9 @@ export default class XAxis {
 	public readonly LABEL_MARGIN_TOP: number;
 	public allLabelsVisible: boolean;
 	private labelWidth: number;
-	private countView: number;     //расчитанное число возможных подписей для отображения
-	private labelMargin: number;   //отступ между подписями по умолчанию
-
-	DEFAULT_LABEL_MARGIN: number;
+	private countView: number;     //calculated number of possible labels to display
+	private labelMargin: number;
+	DEFAULT_LABEL_MARGIN: number;  //default margin between labels
 
 	public constructor(config: IXAxisConfig, svgNode: SVGElement)
 	{
@@ -96,7 +95,7 @@ export default class XAxis {
 
 		if (step <= 1)
 		{
-			//значит можно отрисовать все подписи
+			//we can draw all the signatures
 			step = 1;
 			this.labelMargin = (width - this.labelWidth * this.labels.length) / (this.labels.length - 1);
 		}
@@ -109,7 +108,7 @@ export default class XAxis {
 		{
 			this.labelScale.push({x: x, label: this.labels[i], index: i});
 
-			// вертикальная линия области построения
+			// vertical line of the construction area
 			if (this.config.showGrid)
 				createSVGNode("line", this.group, {
 					x1: x,
@@ -124,7 +123,7 @@ export default class XAxis {
 			if (step == 1)
 			{
 				createSVGNode("text", this.group, {
-					x: x - this.labelWidth / 2,  // чтобы подпись была выровнена посередите точки построения
+					x: x - this.labelWidth / 2,  // so that the labels is aligned in between the construction points
 					y: bottomPoint + this.LABEL_MARGIN_TOP,
 					style: fontSize
 				}).textContent = this.labels[i];
