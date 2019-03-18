@@ -160,12 +160,12 @@ export default class ScrollBox {
 
 	public getLeftPosition()
 	{
-		return this.leftNode.style.width ? parseInt(this.leftNode.style.width) : 0;
+		return this.leftNode.style.width ? parseInt(this.leftNode.style.width) : null;
 	}
 
 	public getRightPosition()
 	{
-		return this.rightNode.style.width ? parseInt(this.scrollNode.style.width) - parseInt(this.rightNode.style.width) : 0;
+		return this.rightNode.style.width ? parseInt(this.scrollNode.style.width) - parseInt(this.rightNode.style.width) : null;
 	}
 
 	public getScale()

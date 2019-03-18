@@ -110,6 +110,7 @@ export default class Chart {
 	private onScrollChanged()
 	{
 		//this.chartArea.setAttribute("transform", `translate(-${this.scrollBox.getLeftPosition()}, 0) scale(${this.scrollBox.getScale()}, 1) `);   линии сильно искажаются
+		this.update();
 	}
 
 	public updateMinMax()
@@ -222,7 +223,7 @@ export default class Chart {
 		this.xAxis.prepare(this.getPlotAreaWidth(), this.yAxis.getWidth());
 
 		this.yAxis.update(this.getPlotAreaHeight(), this.config.width + 50);
-		this.xAxis.update(this.getPlotAreaHeight(), this.yAxis.heightOfLabels, this.getPlotAreaWidth(), this.yAxis.getWidth());
+		this.xAxis.update(this.getPlotAreaHeight(), this.yAxis.heightOfLabels, this.getPlotAreaWidth(), this.yAxis.getWidth(), this.scrollBox.getLeftPosition(), this.scrollBox.getRightPosition());
 
 		this.series.forEach(s => s.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.yAxis, this.xAxis));
 		if (!this.xAxis.allLabelsVisible)

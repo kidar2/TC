@@ -35,7 +35,10 @@ export default class LineSeries {
 		this.hoverCircle.classList.add('chart__tooltip-obj');
 	}
 
-	public update(areaHeight: number, areaWidth: number, yAxis: YAxis, xAxis: XAxis)
+	public update(areaHeight: number,
+					  areaWidth: number,
+					  yAxis: YAxis,
+					  xAxis: XAxis)
 	{
 		if (this.nodes)
 			this.nodes.forEach(n => removeNode(n));

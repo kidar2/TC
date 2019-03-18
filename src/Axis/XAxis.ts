@@ -81,7 +81,12 @@ export default class XAxis {
 	}
 
 
-	public update(bottomPoint: number, topPoint: number, width: number, marginLeft: number)
+	public update(bottomPoint: number,
+					  topPoint: number,
+					  width: number,
+					  marginLeft: number,
+					  startScrollPosition: number,
+					  endScrollPosition: number)
 	{
 		removeNode(this.group);
 		this.group = createSVGNode("g", this.parentNode, {type: "xAxis"});
@@ -134,9 +139,34 @@ export default class XAxis {
 
 		if (step > 1 && this.countView > 2)
 		{
-			this.labelMargin = (width + marginLeft - this.labelWidth * this.countView) / (this.countView - 1);
 			//drawing not all labels
-			for (let i = this.labels.length - 1, index = 0; i >= 0; i -= step, index++)
+
+			let labelsCount = this.countView,
+				 startIndex = this.labels.length - 1,
+				 endIndex = 0;
+
+			if (startScrollPosition && endScrollPosition)
+			{
+				if (startScrollPosition)
+					endIndex = this.labelScale.indexOf(this.getCategory(startScrollPosition));
+
+				if (endScrollPosition)
+					startIndex = this.labelScale.indexOf(this.getCategory(endScrollPosition));
+
+
+				step = (startIndex - endIndex) / this.countView;
+				if (step <= 1)
+				{
+					step = 1;
+					labelsCount = startIndex - endIndex;
+				}
+				else
+					step = Math.round(step);
+			}
+
+			this.labelMargin = (width + marginLeft - this.labelWidth * labelsCount) / (labelsCount - 1);
+
+			for (let i = startIndex, index = 0; i >= endIndex; i -= step, index++)
 			{
 				let label = this.labels[i],
 					 x = width - index * (this.labelMargin + this.labelWidth);
@@ -193,11 +223,6 @@ export default class XAxis {
 		}
 	}
 
-	public getLabelByX(x: number)
-	{
-		let res = this.getCategory(x);
-		return res && res.label;
-	}
 
 	public getIndexOfCategory(x: ICategory)
 	{
