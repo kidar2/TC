@@ -6,7 +6,6 @@ import {CategoriesType} from "./Axis/XAxis";
 function main()
 {
 	let w = Math.max(document.body.offsetWidth - 300, 300),
-		 h = Math.max(document.body.offsetHeight - 300, 300),
 		 charts: Chart[] = [];
 
 	CHARTS_DATA.forEach((data, index) =>
@@ -23,7 +22,7 @@ function main()
 			},
 			title: `Chart ${index + 1}`,
 			width: w,
-			height: h
+			height: 400
 		}));
 	});
 
@@ -36,7 +35,7 @@ function main()
 		id = setTimeout(() =>
 		{
 			id = null;
-			charts.forEach(c => c.setSize(document.body.offsetWidth - 300, document.body.offsetHeight - 300));
+			charts.forEach(c => c.setSize(document.body.offsetWidth - 300, 400));
 		}, 100);
 	});
 }

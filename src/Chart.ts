@@ -81,7 +81,7 @@ export default class Chart {
 			let id = c[0] as string;
 			if (this.config.data.types[id] == "x")
 			{
-				this.xAxis = new XAxis({categories: c, ...this.config.xAxis}, this.chartArea);
+				this.xAxis = new XAxis({categories: c, ...this.config.xAxis}, this.svg);
 			}
 			else
 			{
@@ -95,8 +95,8 @@ export default class Chart {
 		});
 
 		this.updateMinMax();
-		this.yAxis = new YAxis(this.config.yAxis, this.chartArea);
-		this.scrollBox = new ScrollBox(this.root, this.svg);
+		this.yAxis = new YAxis(this.config.yAxis, this.svg);
+		this.scrollBox = new ScrollBox(this.root, this.svg, () => this.onScrollChanged());
 
 		this.setSize(this.config.width, this.config.height);
 		this.svg.addEventListener("mousemove", (e: MouseEvent) => this._onMouseMove(e));
@@ -105,7 +105,11 @@ export default class Chart {
 		this.tooltip = new Tooltip(this.root);
 		this.legend = new Legend(this.series, this.root, this.legendHeight, (serId: string) => this.onLegendItemClick(serId));
 		this.legend.update();
+	}
 
+	private onScrollChanged()
+	{
+		//this.chartArea.setAttribute("transform", `translate(-${this.scrollBox.getLeftPosition()}, 0) scale(${this.scrollBox.getScale()}, 1) `);   линии сильно искажаются
 	}
 
 	public updateMinMax()

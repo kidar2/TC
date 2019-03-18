@@ -11,8 +11,8 @@ export default class ScrollBox {
 	private scrollNode: HTMLElement;
 	private leftResizer: HTMLElement;
 	private rightResizer: HTMLElement;
-	public leftPosition: number;
-	public rightPosition: number;
+	private leftWidth: number;
+	private rightWidth: number;
 	private leftNode: HTMLElement;
 	private rightNode: HTMLElement;
 	private resizingNode: HTMLElement;
@@ -24,11 +24,21 @@ export default class ScrollBox {
 	private centerNode: HTMLElement;
 	private centerOffsetX: number;
 	private centerWidth: number;
+	private changedCallback: Function;
 
-	constructor(parentNode: HTMLElement, svgNode: SVGSVGElement)
+	/**
+	 *
+	 * @param parentNode node for render
+	 * @param svgNode  svg node width chart
+	 * @param changedCallback call when scroll was changed
+	 */
+	constructor(parentNode: HTMLElement,
+					svgNode: SVGSVGElement,
+					changedCallback: Function)
 	{
 		this.originalSVGNode = svgNode;
 		this.parentNode = parentNode;
+		this.changedCallback = changedCallback;
 		this.root = createNode('div', this.parentNode);
 		this.root.classList.add("chart__scroll-box");
 		this.root.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><g type="series"></g></svg>
@@ -74,9 +84,9 @@ export default class ScrollBox {
 		let nodes = this.originalSVGNode.querySelectorAll('polyline');
 		for (let i = 0; i < nodes.length; i++)
 		{
-			let polilyne = nodes.item(i).cloneNode() as SVGElement;
-			polilyne.setAttribute('stroke-width', '1');
-			this.seriesGroup.appendChild(polilyne);
+			let polyline = nodes.item(i).cloneNode() as SVGElement;
+			polyline.setAttribute('stroke-width', '1');
+			this.seriesGroup.appendChild(polyline);
 		}
 		this.svg.style.width = width + 'px';
 		this.svg.style.height = height + 'px';
@@ -92,15 +102,15 @@ export default class ScrollBox {
 		this.scrollNode.style.marginLeft = this.marginLeft + 'px';
 		this.scrollNode.style.width = this.rectSereies.width + 'px';
 
-		if (this.leftPosition == null)
+		if (this.leftWidth == null)
 			this.leftNode.style.width = '0px';
 		else
-			this.leftNode.style.width = this.leftPosition + 'px';
+			this.leftNode.style.width = this.leftWidth + 'px';
 
-		if (this.rightPosition == null)
+		if (this.rightWidth == null)
 			this.rightNode.style.width = '0px';
 		else
-			this.rightNode.style.width = this.rightPosition + 'px';
+			this.rightNode.style.width = this.rightWidth + 'px';
 	}
 
 	private resizerMouseDown(e: MouseEvent)
@@ -116,6 +126,7 @@ export default class ScrollBox {
 		this.resizingNode = null;
 		window.removeEventListener("mouseup", this.mouseUpBinded);
 		window.removeEventListener("mousemove", this.mouseMoveBinded);
+		this.changedCallback();
 	}
 
 
@@ -124,26 +135,47 @@ export default class ScrollBox {
 		let position = e.x - this.rectSereies.left;
 		if (this.resizingNode == this.leftNode)
 		{
-			this.leftPosition = position;
+			this.leftWidth = position;
 			this.leftNode.style.width = position + 'px';
 		}
 		else if (this.resizingNode == this.rightNode)
 		{
-			this.rightPosition = this.rectSereies.width - position;
-			this.rightNode.style.width = this.rightPosition + 'px';
+			this.rightWidth = this.rectSereies.width - position;
+			this.rightNode.style.width = this.rightWidth + 'px';
 		}
 		else
 		{
 			//simple move of center node
 			position -= this.centerOffsetX;
-			this.leftPosition = position;
-			this.rightPosition = this.rectSereies.width - position - this.centerWidth;
-			this.leftNode.style.width = this.leftPosition + 'px';
-			this.rightNode.style.width = this.rightPosition + 'px';
+			let rightw = this.rectSereies.width - position - this.centerWidth;
+			if (position >= 0 && rightw >= 0)
+			{
+				this.leftWidth = position;
+				this.rightWidth = rightw;
+				this.leftNode.style.width = this.leftWidth + 'px';
+				this.rightNode.style.width = this.rightWidth + 'px';
+			}
 		}
 	}
 
-	hide()
+	public getLeftPosition()
+	{
+		return this.leftNode.style.width ? parseInt(this.leftNode.style.width) : 0;
+	}
+
+	public getRightPosition()
+	{
+		return this.rightNode.style.width ? parseInt(this.scrollNode.style.width) - parseInt(this.rightNode.style.width) : 0;
+	}
+
+	public getScale()
+	{
+		let widthOfView = this.getRightPosition() - this.getLeftPosition();
+		return parseInt(this.scrollNode.style.width) / widthOfView;
+	}
+
+
+	public hide()
 	{
 		this.root.style.display = 'none';
 	}
