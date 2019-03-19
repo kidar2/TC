@@ -161,15 +161,15 @@ export default class Chart {
 			let seriesValues = [];
 			for (let i = 1; i < this.config.data.columns.length; i++)  //first array is category axis
 			{
-				let id = (this.config.data.columns[i] as any)[0],
-					 series = this.series.find(s => s.id == id),
+				let serData = this.config.data.columns[i],
+					 series = this.series.find(s => s.config.data == serData),   //todo improve search
 					 value = this.config.data.columns[i][valueIndex];
 				if (value != null && series.visible)
 				{
 					seriesValues.push({
-						name: this.config.data.names[id],
+						name: this.config.data.names[series.id],
 						value: value,
-						color: this.config.data.colors[id]
+						color: this.config.data.colors[series.id]
 					});
 					series.showToolTipPoint(category)
 				}

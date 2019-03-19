@@ -180,12 +180,14 @@ export default class ScrollBox {
 
 	public getLeftPosition()
 	{
-		return this.leftNode.style.width ? parseInt(this.leftNode.style.width) : null;
+		let sWidth = parseInt(this.leftNode.style.width);
+		return isNaN(sWidth) || sWidth == 0 ? null : parseInt(this.leftNode.style.width);
 	}
 
 	public getRightPosition()
 	{
-		return this.rightNode.style.width ? parseInt(this.scrollNode.style.width) - parseInt(this.rightNode.style.width) : null;
+		let sWidth = parseInt(this.rightNode.style.width);
+		return isNaN(sWidth) || sWidth == 0 ? null : parseInt(this.scrollNode.style.width) - sWidth;
 	}
 
 	public hide()

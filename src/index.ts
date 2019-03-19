@@ -8,10 +8,10 @@ function main()
 	let w = Math.max(document.body.offsetWidth - 300, 300),
 		 charts: Chart[] = [];
 
-	CHARTS_DATA.forEach((data, index) =>
-	{
+	// CHARTS_DATA.forEach((data, index) =>
+	// {
 		charts.push(new Chart({
-			data: data as any,
+			data: CHARTS_DATA[1] as any,
 			parentNode: document.body,
 			yAxis: {
 				showGrid: true
@@ -20,11 +20,11 @@ function main()
 				type: CategoriesType.date,
 				showGrid: false
 			},
-			title: `Chart ${index + 1}`,
+			title: `Chart 1`,
 			width: w,
 			height: 400
 		}));
-	});
+	//});
 
 	let id: any;
 	window.addEventListener('resize', () =>

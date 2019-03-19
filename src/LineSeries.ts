@@ -27,6 +27,7 @@ export default class LineSeries {
 		this.config = config;
 		this.parentNode = parentNode;
 		this.id = config.data[0] as string;
+		config.data.shift();   //remove id item;
 		this.hoverCircle = createSVGNode("circle", null, {
 			r: 4,
 			fill: "white",
@@ -52,14 +53,14 @@ export default class LineSeries {
 				 bottomValue = yAxis.getBottomValue();
 
 			//for (let i = xAxis.getStartCategoryIndex(); i <= xAxis.getEndCategoryIndex(); i++)
-			for (let i = 1; i < this.config.data.length; i++)
+			for (let i = 0; i < this.config.data.length; i++)
 			{
 				let value = this.config.data[i] as number;
 
 				if (value != null)
 				{
 					let y = areaHeight - yAxis.calcHeightByValue(value, topValue, bottomValue),
-						 x = xAxis.getXByIndex(i - 1);
+						 x = xAxis.getXByIndex(i);
 					if (points)
 						points += ', ';
 					points += x + " " + y;

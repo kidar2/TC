@@ -62,10 +62,10 @@ export default class XAxis {
 			if (this.config.type == CategoriesType.date)
 			{
 				let d = new Date(this.config.categories[i]);
-				this.labels[i] = formatDate(d);
+				this.labels[i - 1] = formatDate(d);
 			}
 			else
-				this.labels[i] = this.config.categories[i] as string;
+				this.labels[i - 1] = this.config.categories[i] as string;
 		}
 	}
 
@@ -115,7 +115,7 @@ export default class XAxis {
 		let stepX = width / (labelsCount - 1),
 			 x = marginLeft + this.labelWidth / 2;
 
-		for (let i = 1; i < this.labels.length; i++)
+		for (let i = 0; i < this.labels.length; i++)
 		{
 			this.labelScale.push({x: x, label: this.labels[i], index: i});
 
@@ -173,13 +173,16 @@ export default class XAxis {
 			}
 
 			this.labelMargin = (width + marginLeft - this.labelWidth * labelsCount) / (labelsCount - 1);
-
+			//this.labelScale = [];
 			for (let i = startIndex, index = 0; i >= endIndex; i -= step, index++)
 			{
 				let label = this.labels[i],
 					 x = width - index * (this.labelMargin + this.labelWidth);
 				if (x < 0)
 					break;
+
+				//this.labelScale.push({x: x, label: this.labels[i], index: index + 1});
+
 				createSVGNode("text", this.group, {
 					x: x,
 					y: bottomPoint + this.LABEL_MARGIN_TOP,
@@ -219,6 +222,7 @@ export default class XAxis {
 
 	public getXByIndex(index: number)
 	{
+		//index -= this.startCategoryIndex;
 		return this.labelScale[index].x;
 	}
 
