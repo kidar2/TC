@@ -41,11 +41,10 @@ export default class XAxis {
 	private labelWidth: number;
 	private countView: number;     //calculated number of possible labels to display
 	private labelMargin: number;
-	DEFAULT_LABEL_MARGIN: number;
+	DEFAULT_LABEL_MARGIN: number;  //default margin between labels
 	private startCategoryIndex: number;
 	private endCategoryIndex: number;
 
-	//default margin between labels
 
 	public constructor(config: IXAxisConfig, svgNode: SVGElement)
 	{
@@ -94,9 +93,8 @@ export default class XAxis {
 	{
 		removeNode(this.group);
 		this.group = createSVGNode("g", this.parentNode, {type: "xAxis"});
-		this.labelScale = [];
 
-		let labelsCount = this.labels.length - 1;    //first label is id;
+		let labelsCount = this.labels.length;
 		width -= this.config.marginRight + marginLeft;
 
 		let fontSize = `font-size: ${this.config.fontSize}px`,
@@ -107,15 +105,71 @@ export default class XAxis {
 			//we can draw all the signatures
 			step = 1;
 			this.labelMargin = (width - this.labelWidth * labelsCount) / (labelsCount - 1);
-			this.startCategoryIndex = 1;
+			this.startCategoryIndex = 0;
 			this.endCategoryIndex = this.labels.length - 1;
 		}
+		else if (this.countView > 2)
+		{
+			//drawing not all labels
+
+			let labelsCount = this.countView;
+
+			this.startCategoryIndex = 0;
+			this.endCategoryIndex = this.labels.length - 1;
+
+			if (startScrollPosition || endScrollPosition)
+			{
+				if (startScrollPosition)
+					this.startCategoryIndex = this.labelScale.indexOf(this.getCategory(startScrollPosition));
+
+				if (endScrollPosition)
+					this.endCategoryIndex = this.labelScale.indexOf(this.getCategory(endScrollPosition));
 
 
-		let stepX = width / (labelsCount - 1),
+				step = (this.endCategoryIndex - this.startCategoryIndex) / this.countView;
+				if (step <= 1)
+				{
+					step = 1;
+					labelsCount = this.endCategoryIndex - this.startCategoryIndex;
+				}
+				else
+					step = Math.round(step);
+
+				console.log(`from ${this.startCategoryIndex} to ${this.endCategoryIndex} step=${step}`);
+			}
+
+			this.labelMargin = (width + marginLeft - this.labelWidth * labelsCount) / (labelsCount - 1);
+			for (let i = this.endCategoryIndex, index = 0; i >= this.startCategoryIndex; i -= step, index++)
+			{
+				let label = this.labels[i],
+					 x = width - index * (this.labelMargin + this.labelWidth);
+				if (x < 0)
+					break;
+
+				createSVGNode("text", this.group, {
+					x: x,
+					y: bottomPoint + this.LABEL_MARGIN_TOP,
+					style: fontSize
+				}).textContent = label;
+			}
+		}
+
+		this.buildLabelsScale(width, marginLeft, step, topPoint, bottomPoint);
+	}
+
+	private buildLabelsScale(width: number,
+									 marginLeft: number,
+									 step: number,
+									 topPoint: number,
+									 bottomPoint: number)
+	{
+		let labelsCount = this.endCategoryIndex - this.startCategoryIndex;
+		this.labelScale = [];
+		let fontSize = `font-size: ${this.config.fontSize}px`,
+			 stepX = width / (labelsCount - 1),
 			 x = marginLeft + this.labelWidth / 2;
 
-		for (let i = 0; i < this.labels.length; i++)
+		for (let i = this.startCategoryIndex; i <= this.endCategoryIndex; i++)
 		{
 			this.labelScale.push({x: x, label: this.labels[i], index: i});
 
@@ -140,58 +194,6 @@ export default class XAxis {
 				}).textContent = this.labels[i];
 			}
 			x += stepX;
-		}
-
-
-		if (step > 1 && this.countView > 2)
-		{
-			//drawing not all labels
-
-			let labelsCount = this.countView,
-				 startIndex = this.labels.length - 1,
-				 endIndex = 1;
-
-			if (startScrollPosition || endScrollPosition)
-			{
-				if (startScrollPosition)
-					endIndex = this.labelScale.indexOf(this.getCategory(startScrollPosition));
-
-				if (endScrollPosition)
-					startIndex = this.labelScale.indexOf(this.getCategory(endScrollPosition));
-
-
-				step = (startIndex - endIndex) / this.countView;
-				if (step <= 1)
-				{
-					step = 1;
-					labelsCount = startIndex - endIndex;
-				}
-				else
-					step = Math.round(step);
-
-				//console.log(`from ${endIndex} to ${startIndex} step=${step}`);
-			}
-
-			this.labelMargin = (width + marginLeft - this.labelWidth * labelsCount) / (labelsCount - 1);
-			//this.labelScale = [];
-			for (let i = startIndex, index = 0; i >= endIndex; i -= step, index++)
-			{
-				let label = this.labels[i],
-					 x = width - index * (this.labelMargin + this.labelWidth);
-				if (x < 0)
-					break;
-
-				//this.labelScale.push({x: x, label: this.labels[i], index: index + 1});
-
-				createSVGNode("text", this.group, {
-					x: x,
-					y: bottomPoint + this.LABEL_MARGIN_TOP,
-					style: fontSize
-				}).textContent = label;
-			}
-
-			this.startCategoryIndex = endIndex;
-			this.endCategoryIndex = startIndex;
 		}
 	}
 
@@ -222,7 +224,7 @@ export default class XAxis {
 
 	public getXByIndex(index: number)
 	{
-		//index -= this.startCategoryIndex;
+		index -= this.startCategoryIndex;
 		return this.labelScale[index].x;
 	}
 

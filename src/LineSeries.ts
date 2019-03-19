@@ -52,8 +52,7 @@ export default class LineSeries {
 				 topValue = yAxis.getTopValue(),
 				 bottomValue = yAxis.getBottomValue();
 
-			//for (let i = xAxis.getStartCategoryIndex(); i <= xAxis.getEndCategoryIndex(); i++)
-			for (let i = 0; i < this.config.data.length; i++)
+			for (let i = xAxis.getStartCategoryIndex(); i <= xAxis.getEndCategoryIndex(); i++)
 			{
 				let value = this.config.data[i] as number;
 
