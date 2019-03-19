@@ -51,17 +51,18 @@ export default class LineSeries {
 				 topValue = yAxis.getTopValue(),
 				 bottomValue = yAxis.getBottomValue();
 
+			//for (let i = xAxis.getStartCategoryIndex(); i <= xAxis.getEndCategoryIndex(); i++)
 			for (let i = 1; i < this.config.data.length; i++)
 			{
 				let value = this.config.data[i] as number;
 
 				if (value != null)
 				{
+					let y = areaHeight - yAxis.calcHeightByValue(value, topValue, bottomValue),
+						 x = xAxis.getXByIndex(i - 1);
 					if (points)
 						points += ', ';
-
-					let y = areaHeight - yAxis.calcHeightByValue(value, topValue, bottomValue);
-					points += xAxis.getXByIndex(i - 1) + " " + y;
+					points += x + " " + y;
 
 					this.indexToPoint[i] = y;
 				}

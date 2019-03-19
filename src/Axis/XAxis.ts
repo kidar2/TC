@@ -41,7 +41,11 @@ export default class XAxis {
 	private labelWidth: number;
 	private countView: number;     //calculated number of possible labels to display
 	private labelMargin: number;
-	DEFAULT_LABEL_MARGIN: number;  //default margin between labels
+	DEFAULT_LABEL_MARGIN: number;
+	private startCategoryIndex: number;
+	private endCategoryIndex: number;
+
+	//default margin between labels
 
 	public constructor(config: IXAxisConfig, svgNode: SVGElement)
 	{
@@ -77,7 +81,7 @@ export default class XAxis {
 
 	calcStep()
 	{
-		return Math.round(this.labels.length / this.countView);
+		return Math.round((this.labels.length - 1) / this.countView);
 	}
 
 
@@ -92,7 +96,7 @@ export default class XAxis {
 		this.group = createSVGNode("g", this.parentNode, {type: "xAxis"});
 		this.labelScale = [];
 
-
+		let labelsCount = this.labels.length - 1;    //first label is id;
 		width -= this.config.marginRight + marginLeft;
 
 		let fontSize = `font-size: ${this.config.fontSize}px`,
@@ -102,11 +106,13 @@ export default class XAxis {
 		{
 			//we can draw all the signatures
 			step = 1;
-			this.labelMargin = (width - this.labelWidth * this.labels.length) / (this.labels.length - 1);
+			this.labelMargin = (width - this.labelWidth * labelsCount) / (labelsCount - 1);
+			this.startCategoryIndex = 1;
+			this.endCategoryIndex = this.labels.length - 1;
 		}
 
 
-		let stepX = width / (this.labels.length - 1),
+		let stepX = width / (labelsCount - 1),
 			 x = marginLeft + this.labelWidth / 2;
 
 		for (let i = 1; i < this.labels.length; i++)
@@ -143,7 +149,7 @@ export default class XAxis {
 
 			let labelsCount = this.countView,
 				 startIndex = this.labels.length - 1,
-				 endIndex = 0;
+				 endIndex = 1;
 
 			if (startScrollPosition || endScrollPosition)
 			{
@@ -180,7 +186,20 @@ export default class XAxis {
 					style: fontSize
 				}).textContent = label;
 			}
+
+			this.startCategoryIndex = endIndex;
+			this.endCategoryIndex = startIndex;
 		}
+	}
+
+	public getStartCategoryIndex()
+	{
+		return this.startCategoryIndex;
+	}
+
+	public getEndCategoryIndex()
+	{
+		return this.endCategoryIndex;
 	}
 
 	public showTooltipLine(category: ICategory, topPoint: number, bottomPoint: number)
