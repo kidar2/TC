@@ -72,7 +72,6 @@ export default class Chart {
 
 		this.chartArea = createSVGNode('g', this.svg, {type: "area"});
 
-
 		this.series = [];
 
 

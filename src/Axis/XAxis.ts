@@ -35,7 +35,8 @@ export default class XAxis {
 	public group: SVGElement;
 	private tooltipLine: SVGElement;
 	private labels: string[];
-	private labelScale: ICategory[];
+	private labelsScale: ICategory[];  //labels scale сonsidering scroll position
+	private allLabelsScale: ICategory[];
 	public readonly LABEL_MARGIN_TOP: number;
 	public allLabelsVisible: boolean;
 	private labelWidth: number;
@@ -94,25 +95,26 @@ export default class XAxis {
 		removeNode(this.group);
 		this.group = createSVGNode("g", this.parentNode, {type: "xAxis"});
 
-		let labelsCount = this.labels.length;
+
 		width -= this.config.marginRight + marginLeft;
 
 		let fontSize = `font-size: ${this.config.fontSize}px`,
+			 renderLabels = true,
 			 step = this.calcStep();
 
 		if (step <= 1)
 		{
 			//we can draw all the signatures
-			step = 1;
-			this.labelMargin = (width - this.labelWidth * labelsCount) / (labelsCount - 1);
+
+			this.labelMargin = (width - this.labelWidth * this.labels.length) / (this.labels.length - 1);
 			this.startCategoryIndex = 0;
 			this.endCategoryIndex = this.labels.length - 1;
 		}
 		else if (this.countView > 2)
 		{
 			//drawing not all labels
+			renderLabels = false;
 
-			let labelsCount = this.countView;
 
 			this.startCategoryIndex = 0;
 			this.endCategoryIndex = this.labels.length - 1;
@@ -120,25 +122,22 @@ export default class XAxis {
 			if (startScrollPosition || endScrollPosition)
 			{
 				if (startScrollPosition)
-					this.startCategoryIndex = this.labelScale.indexOf(this.getCategory(startScrollPosition));
+					this.startCategoryIndex = this.allLabelsScale.indexOf(this.getCategory(startScrollPosition, this.allLabelsScale));
 
 				if (endScrollPosition)
-					this.endCategoryIndex = this.labelScale.indexOf(this.getCategory(endScrollPosition));
-
+					this.endCategoryIndex = this.allLabelsScale.indexOf(this.getCategory(endScrollPosition, this.allLabelsScale));
 
 				step = (this.endCategoryIndex - this.startCategoryIndex) / this.countView;
 				if (step <= 1)
-				{
 					step = 1;
-					labelsCount = this.endCategoryIndex - this.startCategoryIndex;
-				}
 				else
 					step = Math.round(step);
 
 				console.log(`from ${this.startCategoryIndex} to ${this.endCategoryIndex} step=${step}`);
 			}
 
-			this.labelMargin = (width + marginLeft - this.labelWidth * labelsCount) / (labelsCount - 1);
+
+			this.labelMargin = (width + marginLeft - this.labelWidth * this.countView) / (this.countView - 1);
 			for (let i = this.endCategoryIndex, index = 0; i >= this.startCategoryIndex; i -= step, index++)
 			{
 				let label = this.labels[i],
@@ -154,47 +153,53 @@ export default class XAxis {
 			}
 		}
 
-		this.buildLabelsScale(width, marginLeft, step, topPoint, bottomPoint);
+		this.labelsScale = this.buildLabelsScale(width, marginLeft, renderLabels, topPoint, bottomPoint);
+
+		if (!this.allLabelsScale)
+			this.allLabelsScale = this.labelsScale;
 	}
 
 	private buildLabelsScale(width: number,
 									 marginLeft: number,
-									 step: number,
+									 renderLabels: boolean,
 									 topPoint: number,
 									 bottomPoint: number)
 	{
-		let labelsCount = this.endCategoryIndex - this.startCategoryIndex;
-		this.labelScale = [];
+		let labelScale = [];
 		let fontSize = `font-size: ${this.config.fontSize}px`,
-			 stepX = width / (labelsCount - 1),
-			 x = marginLeft + this.labelWidth / 2;
+			 stepScaleX = renderLabels ?
+				  (width - this.labelWidth / 2) / (this.labels.length - 1) :
+				  width / (this.endCategoryIndex - this.startCategoryIndex),
+			 scaleX = marginLeft + this.labelWidth / 2;
 
 		for (let i = this.startCategoryIndex; i <= this.endCategoryIndex; i++)
 		{
-			this.labelScale.push({x: x, label: this.labels[i], index: i});
+			labelScale.push({x: scaleX, label: this.labels[i], index: i});
 
 			// vertical line of the construction area
 			if (this.config.showGrid)
 				createSVGNode("line", this.group, {
-					x1: x,
+					x1: scaleX,
 					y1: topPoint,
 					y2: bottomPoint,
-					x2: x,
+					x2: scaleX,
 					stroke: this.config.color,
 					"stroke-width": 1,
 					"shape-rendering": "crispEdges"
 				});
 
-			if (step == 1)
+			if (renderLabels)
 			{
 				createSVGNode("text", this.group, {
-					x: x - this.labelWidth / 2,  // so that the labels is aligned in between the construction points
+					x: scaleX - this.labelWidth / 2,  // so that the labels is aligned in between the construction points
 					y: bottomPoint + this.LABEL_MARGIN_TOP,
 					style: fontSize
 				}).textContent = this.labels[i];
 			}
-			x += stepX;
+			scaleX += stepScaleX;
 		}
+
+		return labelScale;
 	}
 
 	public getStartCategoryIndex()
@@ -225,27 +230,27 @@ export default class XAxis {
 	public getXByIndex(index: number)
 	{
 		index -= this.startCategoryIndex;
-		return this.labelScale[index].x;
+		return this.labelsScale[index].x;
 	}
 
-	public getCategory(x: number)
+	public getCategory(x: number, labelsScale: ICategory[] = this.labelsScale)
 	{
-		if (this.labelScale[0].x > x)
-			return this.labelScale[0];
+		if (labelsScale[0].x > x)
+			return labelsScale[0];
 
-		if (x > this.labelScale[this.labelScale.length - 1].x)
-			return this.labelScale[this.labelScale.length - 1];
+		if (x > labelsScale[labelsScale.length - 1].x)
+			return labelsScale[labelsScale.length - 1];
 
-		for (let i = 1; i < this.labelScale.length; i++)
+		for (let i = 1; i < labelsScale.length; i++)
 		{
-			if (x > this.labelScale[i - 1].x && x <= this.labelScale[i].x)
+			if (x > labelsScale[i - 1].x && x <= labelsScale[i].x)
 			{
-				if (Math.abs(x - this.labelScale[i - 1].x) < Math.abs(x - this.labelScale[i].x))
+				if (Math.abs(x - labelsScale[i - 1].x) < Math.abs(x - labelsScale[i].x))
 				{
-					return this.labelScale[i - 1];
+					return labelsScale[i - 1];
 				}
 
-				return this.labelScale[i];
+				return labelsScale[i];
 			}
 		}
 	}
@@ -253,6 +258,7 @@ export default class XAxis {
 
 	public getIndexOfCategory(x: ICategory)
 	{
-		return this.labelScale.indexOf(x) + 1;
+		return this.labelsScale.indexOf(x);
 	}
+
 }
