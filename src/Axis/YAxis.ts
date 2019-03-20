@@ -1,4 +1,4 @@
-import {calcSize, createSVGNode, formatValue, removeNode} from "../Util";
+import {calcSize, createSVGNode, formatValue, getTopValue} from "../Util";
 
 export interface IYAxisConfig {
 	color?: string;
@@ -38,18 +38,14 @@ export default class YAxis {
 		this.group = createSVGNode("g", this.parentNode, {type: "yAxis"});
 	}
 
-
-	public getTopValue()
+	getTopValue()
 	{
-		let countR = (this.max).toFixed(0).length,
-			 topValue = Math.pow(10, countR) / 2;
-
-		if (topValue < this.max)
-			topValue *= 2;
-
-		return topValue;
+		return getTopValue(this.max);
 	}
 
+	/**
+	 * Calculation Bottom value for YAxis based on min value of view data on chart
+	 */
 	public getBottomValue()
 	{
 		let countR = (this.min).toFixed(0).length - 1;
@@ -65,10 +61,7 @@ export default class YAxis {
 		}
 		else
 		{
-			res = -res;
-			if (res > this.min)
-				res *= 2;
-			return res;
+			return -getTopValue(res);
 		}
 	}
 
@@ -106,7 +99,6 @@ export default class YAxis {
 	{
 		this.group.innerHTML = "";
 		this.height = height - this.heightOfLabels;
-
 
 
 		let ticksCount = this.config.ticksCount,

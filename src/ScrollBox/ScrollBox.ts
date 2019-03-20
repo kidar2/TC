@@ -199,7 +199,7 @@ export default class ScrollBox {
 		this.root.style.display = 'none';
 	}
 
-	updateSeriesVisible(s: LineSeries)
+	public updateSeriesVisible(s: LineSeries)
 	{
 		let nodes = this.svg.querySelectorAll(`[series-id="${s.id}"]`);
 		for (let i = 0; i < nodes.length; i++)

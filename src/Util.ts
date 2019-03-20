@@ -116,7 +116,7 @@ export function formatDate(date: Date)
 
 
 /**
- * Calculate size of strings
+ * Calculate max size of strings
  * @param labels
  * @param fontSize
  */
@@ -132,4 +132,18 @@ export function calcSize(labels: string[], fontSize?: number): { width: number, 
 	let res = div.getBoundingClientRect();
 	document.body.removeChild(div);
 	return res;
+}
+
+/**
+ * Calculation Top value for YAxis based on max value of view data on chart
+ */
+export function getTopValue(max: number)
+{
+	let countR = max.toFixed(0).length,
+		 topValue = Math.pow(10, countR);
+
+	let delta = topValue - max,
+		 x = Math.floor(delta * 10 / topValue);
+
+	return topValue - x * Math.pow(10, countR - 1);
 }
