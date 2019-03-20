@@ -27,6 +27,8 @@ export default class ScrollBox {
 	private centerWidth: number;
 	private changedCallback: Function;
 
+	private readonly RESIZER_WIDTH: number;
+
 	/**
 	 *
 	 * @param parentNode node for render
@@ -37,6 +39,7 @@ export default class ScrollBox {
 					svgNode: SVGSVGElement,
 					changedCallback: Function)
 	{
+		this.RESIZER_WIDTH = 5;
 		this.originalSVGNode = svgNode;
 		this.parentNode = parentNode;
 		this.changedCallback = changedCallback;
@@ -161,11 +164,11 @@ export default class ScrollBox {
 		else
 		{
 			//simple move of center node
-			position -= this.centerOffsetX + 5;
+			position -= this.centerOffsetX + this.RESIZER_WIDTH;
 			if (position < 0)
 				position = 0;
 
-			let rightw = this.rectSereies.width - position - this.centerWidth - 10;   //it'ts width of resizers;
+			let rightw = this.rectSereies.width - position - this.centerWidth - this.RESIZER_WIDTH * 2;
 
 			if (rightw >= 0)
 			{
@@ -194,13 +197,13 @@ export default class ScrollBox {
 	public getLeftPosition()
 	{
 		let sWidth = parseInt(this.leftNode.style.width);
-		return isNaN(sWidth) || sWidth == 0 ? null : parseInt(this.leftNode.style.width);
+		return isNaN(sWidth) || sWidth == 0 ? null : sWidth + this.RESIZER_WIDTH;
 	}
 
 	public getRightPosition()
 	{
 		let sWidth = parseInt(this.rightNode.style.width);
-		return isNaN(sWidth) || sWidth == 0 ? null : parseInt(this.scrollNode.style.width) - sWidth;
+		return isNaN(sWidth) || sWidth == 0 ? null : parseInt(this.scrollNode.style.width) - sWidth - 2 * this.RESIZER_WIDTH;
 	}
 
 	public hide()
