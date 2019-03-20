@@ -108,20 +108,23 @@ export default class Chart {
 
 	private onScrollChanged()
 	{
+		this.updateMinMax();
 		this.update();
 	}
 
 	public updateMinMax()
 	{
 		let min = Number.MAX_VALUE,
-			 max = Number.MIN_VALUE;
+			 max = Number.MIN_VALUE,
+			 startIndex = this.scrollBox && this.scrollBox.getLeftPosition() != null ? this.xAxis.getIndexOfCategoryByPosition(this.scrollBox.getLeftPosition()) : 0,
+			 endIndex = this.scrollBox && this.scrollBox.getRightPosition() != null  ? this.xAxis.getIndexOfCategoryByPosition(this.scrollBox.getRightPosition()) : this.config.data.columns[0].length - 1;
 
 		for (let i = 0; i < this.series.length; i++)
 		{
 			if (this.series[i].visible)
 			{
 				let data = this.series[i].config.data;
-				for (let j = 1; j < data.length; j++)
+				for (let j = startIndex; j <= endIndex; j++)
 				{
 					if (data[j] != null)
 					{

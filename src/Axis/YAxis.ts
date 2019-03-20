@@ -48,12 +48,11 @@ export default class YAxis {
 	 */
 	public getBottomValue()
 	{
-		let countR = (this.min).toFixed(0).length - 1;
-
-		let res = Math.pow(10, countR) / 2;
-
 		if (this.min >= 0)
 		{
+			let countR = (this.min).toFixed(0).length - 1;
+			let res = Math.pow(10, countR) / 2;
+
 			if (res < 10)
 				return 0;
 			else
@@ -61,7 +60,7 @@ export default class YAxis {
 		}
 		else
 		{
-			return -getTopValue(res);
+			return -getTopValue(Math.abs(this.min));
 		}
 	}
 

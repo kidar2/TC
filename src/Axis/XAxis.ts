@@ -122,10 +122,10 @@ export default class XAxis {
 			if (startScrollPosition || endScrollPosition)
 			{
 				if (startScrollPosition)
-					this.startCategoryIndex = this.allLabelsScale.indexOf(this.getCategory(startScrollPosition, this.allLabelsScale));
+					this.startCategoryIndex = this.getIndexOfCategoryByPosition(startScrollPosition);
 
 				if (endScrollPosition)
-					this.endCategoryIndex = this.allLabelsScale.indexOf(this.getCategory(endScrollPosition, this.allLabelsScale));
+					this.endCategoryIndex = this.getIndexOfCategoryByPosition(endScrollPosition);
 
 				step = (this.endCategoryIndex - this.startCategoryIndex) / this.countView;
 				if (step <= 1)
@@ -259,6 +259,12 @@ export default class XAxis {
 	public getIndexOfCategory(x: ICategory)
 	{
 		return this.labelsScale.indexOf(x);
+	}
+
+
+	public getIndexOfCategoryByPosition(position: number)
+	{
+		return this.allLabelsScale.indexOf(this.getCategory(position, this.allLabelsScale));
 	}
 
 }
