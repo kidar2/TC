@@ -35,6 +35,7 @@ export default class YAxis {
 		this.config = {...YAxisDefaultConfig, ...config};
 		this.parentNode = svgNode;
 		this.marginLeft = 40;
+		this.group = createSVGNode("g", this.parentNode, {type: "yAxis"});
 	}
 
 
@@ -103,10 +104,9 @@ export default class YAxis {
 
 	public update(height: number, width: number)
 	{
-		removeNode(this.group);
+		this.group.innerHTML = "";
 		this.height = height - this.heightOfLabels;
 
-		this.group = createSVGNode("g", this.parentNode, {type: "yAxis"});
 
 
 		let ticksCount = this.config.ticksCount,

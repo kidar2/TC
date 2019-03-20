@@ -14,7 +14,9 @@
     height: 40px;
   }
 
-  &__tooltip-obj
+  &__tooltip-obj,
+  polyline,
+  line
   {
     pointer-events: none;
   }

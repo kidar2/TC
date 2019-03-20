@@ -1,7 +1,7 @@
 import './chart.scss';
 import YAxis, {IYAxisConfig} from "./Axis/YAxis";
 import XAxis, {IXAxisConfig} from "./Axis/XAxis";
-import {createNode, createSVGNode, IHash} from "./Util";
+import {createNode, createSVGNode, formatValue, IHash} from "./Util";
 import LineSeries from "./LineSeries";
 import Tooltip from "./ToolTip/Tooltip";
 import Legend from "./Legend/Legend";
@@ -70,6 +70,7 @@ export default class Chart {
 		this.titleHeight = this.titleNode.offsetHeight;
 		this.root.appendChild(this.svg);
 
+		this.yAxis = new YAxis(this.config.yAxis, this.svg);
 		this.chartArea = createSVGNode('g', this.svg, {type: "area"});
 
 		this.series = [];
@@ -94,7 +95,6 @@ export default class Chart {
 		});
 
 		this.updateMinMax();
-		this.yAxis = new YAxis(this.config.yAxis, this.svg);
 		this.scrollBox = new ScrollBox(this.root, this.svg, () => this.onScrollChanged());
 
 		this.setSize(this.config.width, this.config.height);
@@ -108,7 +108,6 @@ export default class Chart {
 
 	private onScrollChanged()
 	{
-		//this.chartArea.setAttribute("transform", `translate(-${this.scrollBox.getLeftPosition()}, 0) scale(${this.scrollBox.getScale()}, 1) `);   линии сильно искажаются
 		this.update();
 	}
 
@@ -167,7 +166,7 @@ export default class Chart {
 				{
 					seriesValues.push({
 						name: this.config.data.names[series.id],
-						value: value,
+						value: formatValue(value),
 						color: this.config.data.colors[series.id]
 					});
 					series.showToolTipPoint(category)
@@ -185,6 +184,7 @@ export default class Chart {
 		s.setIsVisible(!s.visible);
 		this.updateMinMax();
 		this.update();
+		this.scrollBox.updateSeriesVisible(s);
 	}
 
 	getPlotAreaHeight()
@@ -226,7 +226,8 @@ export default class Chart {
 
 		this.series.forEach(s => s.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.yAxis, this.xAxis));
 		if (!this.xAxis.allLabelsVisible)
-			this.scrollBox.update(this.config.width,
+			this.scrollBox.update(
+				 this.config.width,
 				 this.scrollBoxHeight,
 				 "0 0 " + this.config.width + " " + this.getSVGNodeHeight());
 		else

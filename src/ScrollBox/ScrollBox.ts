@@ -1,5 +1,6 @@
 import './ScrollBox.scss';
 import {createNode} from "./../Util";
+import LineSeries from "../LineSeries";
 
 
 export default class ScrollBox {
@@ -80,17 +81,20 @@ export default class ScrollBox {
 	update(width: number, height: number, viewBox: string)
 	{
 		this.root.style.display = '';
-		this.seriesGroup.innerHTML = '';
-		let nodes = this.originalSVGNode.querySelectorAll('polyline');
-		for (let i = 0; i < nodes.length; i++)
+
+		if (this.seriesGroup.childNodes.length == 0)
 		{
-			let polyline = nodes.item(i).cloneNode() as SVGElement;
-			polyline.setAttribute('stroke-width', '1');
-			this.seriesGroup.appendChild(polyline);
+			let nodes = this.originalSVGNode.querySelectorAll('polyline');
+			for (let i = 0; i < nodes.length; i++)
+			{
+				let polyline = nodes.item(i).cloneNode() as SVGElement;
+				polyline.setAttribute('stroke-width', '1');
+				this.seriesGroup.appendChild(polyline);
+			}
+			this.svg.setAttribute("viewBox", viewBox);
 		}
 		this.svg.style.width = width + 'px';
 		this.svg.style.height = height + 'px';
-		this.svg.setAttribute("viewBox", viewBox);
 
 
 		this.scrollNode.style.height = height + 'px';
@@ -193,5 +197,15 @@ export default class ScrollBox {
 	public hide()
 	{
 		this.root.style.display = 'none';
+	}
+
+	updateSeriesVisible(s: LineSeries)
+	{
+		let nodes = this.svg.querySelectorAll(`[series-id="${s.id}"]`);
+		for (let i = 0; i < nodes.length; i++)
+		{
+			let polyline = nodes.item(i) as SVGElement;
+			polyline.style.display = s.visible ? '' : 'none';
+		}
 	}
 }

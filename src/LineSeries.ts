@@ -70,6 +70,7 @@ export default class LineSeries {
 				{
 					this.nodes.push(createSVGNode("polyline", this.parentNode, {
 						points,
+						"series-id": this.id,
 						fill: "transparent",
 						stroke: this.config.color,
 						'stroke-width': '2'
@@ -81,6 +82,7 @@ export default class LineSeries {
 			if (points)
 				this.nodes.push(createSVGNode("polyline", this.parentNode, {
 					points,
+					"series-id": this.id,
 					fill: "transparent",
 					stroke: this.config.color,
 					'stroke-width': '2'
