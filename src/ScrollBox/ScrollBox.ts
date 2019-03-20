@@ -139,6 +139,8 @@ export default class ScrollBox {
 		let position = e.x - this.rectSereies.left;
 		if (this.resizingNode == this.leftNode)
 		{
+			if (position < 0)
+				position = 0;
 			if (this.checkMinSize(position, this.rightWidth))
 			{
 				this.leftWidth = position;
@@ -148,6 +150,8 @@ export default class ScrollBox {
 		else if (this.resizingNode == this.rightNode)
 		{
 			let w = this.rectSereies.width - position;
+			if (w < 0)
+				w = 0;
 			if (this.checkMinSize(this.leftWidth, w))
 			{
 				this.rightWidth = w;
@@ -158,16 +162,21 @@ export default class ScrollBox {
 		{
 			//simple move of center node
 			position -= this.centerOffsetX + 5;
+			if (position < 0)
+				position = 0;
+
 			let rightw = this.rectSereies.width - position - this.centerWidth - 10;   //it'ts width of resizers;
 
-			if (position >= 0 && rightw >= 0)
+			if (rightw >= 0)
 			{
 				this.leftWidth = position;
-				this.rightWidth = rightw;
-
 				this.leftNode.style.width = this.leftWidth + 'px';
-				this.rightNode.style.width = this.rightWidth + 'px';
 			}
+			else
+				rightw = 0;
+
+			this.rightWidth = rightw;
+			this.rightNode.style.width = this.rightWidth + 'px';
 		}
 	}
 

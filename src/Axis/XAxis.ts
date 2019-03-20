@@ -133,7 +133,7 @@ export default class XAxis {
 				else
 					step = Math.round(step);
 
-				console.log(`from ${this.startCategoryIndex} to ${this.endCategoryIndex} step=${step}`);
+				//console.log(`from ${this.allLabelsScale[this.startCategoryIndex].label} to ${this.allLabelsScale[this.endCategoryIndex].label} step=${step}`);
 			}
 
 
