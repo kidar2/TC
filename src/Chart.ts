@@ -117,7 +117,7 @@ export default class Chart {
 		let min = Number.MAX_VALUE,
 			 max = Number.MIN_VALUE,
 			 startIndex = this.scrollBox && this.scrollBox.getLeftPosition() != null ? this.xAxis.getIndexOfCategoryByPosition(this.scrollBox.getLeftPosition()) : 0,
-			 endIndex = this.scrollBox && this.scrollBox.getRightPosition() != null  ? this.xAxis.getIndexOfCategoryByPosition(this.scrollBox.getRightPosition()) : this.config.data.columns[0].length - 1;
+			 endIndex = this.scrollBox && this.scrollBox.getRightPosition() != null ? this.xAxis.getIndexOfCategoryByPosition(this.scrollBox.getRightPosition()) : this.config.data.columns[0].length - 1;
 
 		for (let i = 0; i < this.series.length; i++)
 		{
@@ -150,7 +150,8 @@ export default class Chart {
 
 	_onMouseMove(e: MouseEvent)
 	{
-		let category = this.xAxis.getCategory(e.offsetX);
+		let x = e.offsetX - this.getMarginLeft();
+		let category = x >= 0 ? this.xAxis.getCategory(x) : null;
 
 		if (!category)
 		{
@@ -159,6 +160,7 @@ export default class Chart {
 		else
 		{
 			let valueIndex = this.xAxis.getIndexOfCategory(category);
+			category = {...category, x: category.x + this.getMarginLeft()};
 			let seriesValues = [];
 			for (let i = 1; i < this.config.data.columns.length; i++)  //first array is category axis
 			{
@@ -172,7 +174,7 @@ export default class Chart {
 						value: formatValue(value),
 						color: this.config.data.colors[series.id]
 					});
-					series.showToolTipPoint(category)
+					series.showToolTipPoint(category);
 				}
 			}
 
@@ -205,6 +207,11 @@ export default class Chart {
 		return this.config.width - this.yAxis.getWidth();
 	}
 
+	getMarginLeft()
+	{
+		return this.yAxis.getWidth() + this.xAxis.labelWidth / 2;
+	}
+
 	public setSize(width: number, height: number)
 	{
 		this.config.width = width;
@@ -227,7 +234,7 @@ export default class Chart {
 		this.yAxis.update(this.getPlotAreaHeight(), this.config.width + 50);
 		this.xAxis.update(this.getPlotAreaHeight(), this.yAxis.heightOfLabels, this.getPlotAreaWidth(), this.yAxis.getWidth(), this.scrollBox.getLeftPosition(), this.scrollBox.getRightPosition());
 
-		this.series.forEach(s => s.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.yAxis, this.xAxis));
+		this.series.forEach(s => s.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.getMarginLeft(), this.yAxis, this.xAxis));
 		if (!this.xAxis.allLabelsVisible)
 			this.scrollBox.update(
 				 this.config.width,

@@ -38,6 +38,7 @@ export default class LineSeries {
 
 	public update(areaHeight: number,
 					  areaWidth: number,
+					  marginLeft: number,
 					  yAxis: YAxis,
 					  xAxis: XAxis)
 	{
@@ -59,7 +60,7 @@ export default class LineSeries {
 				if (value != null)
 				{
 					let y = areaHeight - yAxis.calcHeightByValue(value, topValue, bottomValue),
-						 x = xAxis.getXByIndex(i);
+						 x = xAxis.getXByIndex(i) + marginLeft;
 					if (points)
 						points += ', ';
 					points += x + " " + y;
@@ -105,7 +106,7 @@ export default class LineSeries {
 		{
 			if (!this.hoverCircle.parentNode)
 				this.parentNode.appendChild(this.hoverCircle);
-			this.hoverCircle.setAttribute("cx", category.x + "");
+			this.hoverCircle.setAttribute("cx", category.x + '');
 			this.hoverCircle.setAttribute("cy", this.indexToPoint[category.index] + "");
 		}
 	}

@@ -39,7 +39,7 @@ export default class XAxis {
 	private allLabelsScale: ICategory[];
 	public readonly LABEL_MARGIN_TOP: number;
 	public allLabelsVisible: boolean;
-	private labelWidth: number;
+	public labelWidth: number;
 	private countView: number;     //calculated number of possible labels to display
 	private labelMargin: number;
 	DEFAULT_LABEL_MARGIN: number;  //default margin between labels
@@ -133,7 +133,7 @@ export default class XAxis {
 				else
 					step = Math.round(step);
 
-				console.log(`from ${this.allLabelsScale[this.startCategoryIndex].label} to ${this.allLabelsScale[this.endCategoryIndex].label} step=${step}`);
+				//console.log(`from ${this.allLabelsScale[this.startCategoryIndex].label} to ${this.allLabelsScale[this.endCategoryIndex].label} step=${step}`);
 			}
 
 
@@ -153,14 +153,13 @@ export default class XAxis {
 			}
 		}
 
-		this.labelsScale = this.buildLabelsScale(width, marginLeft, renderLabels, topPoint, bottomPoint);
+		this.labelsScale = this.buildLabelsScale(width, renderLabels, topPoint, bottomPoint);
 
 		if (!this.allLabelsScale)
 			this.allLabelsScale = this.labelsScale;
 	}
 
 	private buildLabelsScale(width: number,
-									 marginLeft: number,
 									 renderLabels: boolean,
 									 topPoint: number,
 									 bottomPoint: number)
@@ -170,7 +169,7 @@ export default class XAxis {
 			 stepScaleX = renderLabels ?
 				  (width - this.labelWidth / 2) / (this.labels.length - 1) :
 				  width / (this.endCategoryIndex - this.startCategoryIndex),
-			 scaleX = marginLeft + this.labelWidth / 2;
+			 scaleX = 0;
 
 		for (let i = this.startCategoryIndex; i <= this.endCategoryIndex; i++)
 		{
@@ -191,7 +190,7 @@ export default class XAxis {
 			if (renderLabels)
 			{
 				createSVGNode("text", this.group, {
-					x: scaleX - this.labelWidth / 2,  // so that the labels is aligned in between the construction points
+					x: scaleX,  // so that the labels is aligned in between the construction points
 					y: bottomPoint + this.LABEL_MARGIN_TOP,
 					style: fontSize
 				}).textContent = this.labels[i];
