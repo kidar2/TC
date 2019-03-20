@@ -133,7 +133,7 @@ export default class XAxis {
 				else
 					step = Math.round(step);
 
-				//console.log(`from ${this.allLabelsScale[this.startCategoryIndex].label} to ${this.allLabelsScale[this.endCategoryIndex].label} step=${step}`);
+				console.log(`from ${this.allLabelsScale[this.startCategoryIndex].label} to ${this.allLabelsScale[this.endCategoryIndex].label} step=${step}`);
 			}
 
 
@@ -258,7 +258,8 @@ export default class XAxis {
 
 	public getIndexOfCategory(x: ICategory)
 	{
-		return this.labelsScale.indexOf(x);
+		let res = this.allLabelsScale.find(c => c.label == x.label);
+		return res ? this.allLabelsScale.indexOf(res) : -1;
 	}
 
 
