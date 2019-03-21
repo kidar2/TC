@@ -29,13 +29,16 @@ export default class YAxis {
 	height: number;
 	min: number;
 	max: number;
+	currentTopValue: number;
+	currentBottomValue: number;
+	animate_delta: number;
 
 	public constructor(config: IYAxisConfig, svgNode: SVGElement)
 	{
 		this.config = {...YAxisDefaultConfig, ...config};
 		this.parentNode = svgNode;
 		this.marginLeft = 40;
-		this.group = createSVGNode("g", this.parentNode, {type: "yAxis"});
+		this.animate_delta = 50;
 	}
 
 	getTopValue()
@@ -75,6 +78,11 @@ export default class YAxis {
 		return perc * this.height;
 	}
 
+	shouldAnimate()
+	{
+		return (this.currentBottomValue != this.getBottomValue() || this.currentTopValue != this.getTopValue());
+	}
+
 	public prepare(min: number, max: number)
 	{
 		this.min = min;
@@ -94,9 +102,93 @@ export default class YAxis {
 		}
 	}
 
-	public update(height: number, width: number)
+	private hideGroup(group: SVGElement, animateType: number)
 	{
-		this.group.innerHTML = "";
+		if (group)
+		{
+			if (animateType != null)
+			{
+				let baseGroupProps = {
+					begin: "DOMNodeInserted",
+					dur: "0.33s",
+					fill: "freeze",
+					repeatCount: "1"
+				};
+				let animateOpacity = createSVGNode("animate", null, {
+					attributeName: "opacity",
+					attributeType: "CSS",
+					"from": "1",
+					to: "0",
+					...baseGroupProps
+				});
+
+				let animateTransform = createSVGNode("animateTransform", null, {
+					type: "translate",
+					attributeName: "transform",
+					"from": "0 0",
+					to: "0 " + (animateType * this.animate_delta),
+					...baseGroupProps
+				});
+
+				animateTransform.addEventListener('endEvent', () =>
+				{
+					this.parentNode.removeChild(group);
+				}, false);
+
+
+				group.appendChild(animateTransform);
+				group.appendChild(animateOpacity);
+			}
+			else
+				this.parentNode.removeChild(group);
+		}
+	}
+
+	private showGroup(group: SVGElement, animateType: number)
+	{
+		if (animateType != null)
+		{
+			let baseGroupProps = {
+				begin: "DOMNodeInserted",
+				dur: "0.33s",
+				fill: "freeze",
+				repeatCount: "1"
+			};
+			let animateOpacity = createSVGNode("animate", null, {
+				attributeName: "opacity",
+				attributeType: "CSS",
+				"from": "0",
+				to: "1",
+				...baseGroupProps
+			});
+
+			let animateTransform = createSVGNode("animateTransform", null, {
+				type: "translate",
+				attributeName: "transform",
+				"from": "0 " + (animateType * this.animate_delta),
+				to: "0 0",
+				...baseGroupProps
+			});
+
+			animateTransform.addEventListener('endEvent', () =>
+			{
+				group.removeChild(animateTransform);
+				group.removeChild(animateOpacity);
+			}, false);
+
+
+			group.appendChild(animateTransform);
+			group.appendChild(animateOpacity);
+		}
+
+		this.parentNode.appendChild(group);
+	}
+
+	public update(height: number, width: number, animate: boolean)
+	{
+		let animateType = animate && this.shouldAnimate() ? (this.currentTopValue > this.getTopValue() ? 1 : -1) : null;
+		this.hideGroup(this.group, animateType);
+		this.group = createSVGNode("g", null, {type: "yAxis"});
 		this.height = height - this.heightOfLabels;
 
 
@@ -132,7 +224,6 @@ export default class YAxis {
 			labels.push(label);
 		}
 
-
 		if (this.config.lineVisible)
 			createSVGNode("line", this.group, {
 				x1: this.widthOfLabels + 5,
@@ -143,6 +234,11 @@ export default class YAxis {
 				"stroke-width": 1,
 				"shape-rendering": "crispEdges"
 			});
+
+		this.showGroup(this.group, animateType);
+
+		this.currentTopValue = topValue;
+		this.currentBottomValue = bottomValue;
 	}
 
 	getWidth()
