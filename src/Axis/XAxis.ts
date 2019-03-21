@@ -129,7 +129,10 @@ export default class XAxis {
 
 				step = (this.endCategoryIndex - this.startCategoryIndex) / this.countView;
 				if (step <= 1)
+				{
 					step = 1;
+					this.countView = this.endCategoryIndex - this.startCategoryIndex;
+				}
 				else
 					step = Math.round(step);
 
@@ -190,7 +193,7 @@ export default class XAxis {
 			if (renderLabels)
 			{
 				createSVGNode("text", this.group, {
-					x: scaleX,  // so that the labels is aligned in between the construction points
+					x: scaleX + this.labelWidth / 2,  // so that the labels is aligned in between the construction points
 					y: bottomPoint + this.LABEL_MARGIN_TOP,
 					style: fontSize
 				}).textContent = this.labels[i];
