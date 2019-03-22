@@ -75,7 +75,7 @@ export default class XAxis {
 		width -= this.config.marginRight + marginLeft;
 		if (this.labelWidth == null)
 			this.labelWidth = calcSize(this.labels, this.config.fontSize).width;
-		this.countView = width / (this.labelWidth + this.labelMargin);
+		this.countView = Math.round(width / (this.labelWidth + this.labelMargin));
 		this.allLabelsVisible = this.calcStep() <= 1;
 	}
 
@@ -99,26 +99,12 @@ export default class XAxis {
 		width -= this.config.marginRight + marginLeft;
 
 		let fontSize = `font-size: ${this.config.fontSize}px`,
-			 renderLabels = true,
 			 step = this.calcStep();
 
-		if (step <= 1)
-		{
-			//we can draw all the signatures
+		this.startCategoryIndex = 0;
+		this.endCategoryIndex = this.labels.length - 1;
 
-			this.labelMargin = (width - this.labelWidth * this.labels.length) / (this.labels.length - 1);
-			this.startCategoryIndex = 0;
-			this.endCategoryIndex = this.labels.length - 1;
-		}
-		else if (this.countView > 2)
-		{
-			//drawing not all labels
-			renderLabels = false;
-
-
-			this.startCategoryIndex = 0;
-			this.endCategoryIndex = this.labels.length - 1;
-
+		if (step > 1)
 			if (startScrollPosition || endScrollPosition)
 			{
 				if (startScrollPosition)
@@ -127,54 +113,35 @@ export default class XAxis {
 				if (endScrollPosition)
 					this.endCategoryIndex = this.getIndexOfCategoryByPosition(endScrollPosition);
 
-				step = (this.endCategoryIndex - this.startCategoryIndex) / this.countView;
-				if (step <= 1)
+
+				if (this.endCategoryIndex - this.startCategoryIndex > this.countView)
 				{
-					step = 1;
-					this.countView = this.endCategoryIndex - this.startCategoryIndex;
+					step = (this.endCategoryIndex - this.startCategoryIndex) / this.countView;
+					if (step <= 1)
+						step = 1;
+					else if (step < 2 && step < 1.1)
+						step = 2;
+					else
+						step = Math.ceil(step);
 				}
 				else
-					step = Math.round(step);
+					step = 1;
 
+				let ostatok = (this.endCategoryIndex - this.startCategoryIndex) % step;
+				let willShowCount = Math.floor((this.endCategoryIndex - this.startCategoryIndex) / step) + (ostatok >= 1 ? 1 : 0);
+				this.labelMargin = (width - this.labelWidth * willShowCount) / (willShowCount - 1);
 				//console.log(`from ${this.allLabelsScale[this.startCategoryIndex].label} to ${this.allLabelsScale[this.endCategoryIndex].label} step=${step}`);
 			}
 
+		console.log(step);
 
-			this.labelMargin = (width + marginLeft - this.labelWidth * this.countView) / (this.countView - 1);
-			for (let i = this.endCategoryIndex, index = 0; i >= this.startCategoryIndex; i -= step, index++)
-			{
-				let label = this.labels[i],
-					 x = width - index * (this.labelMargin + this.labelWidth);
-				if (x < 0)
-					break;
-
-				createSVGNode("text", this.group, {
-					x: x,
-					y: bottomPoint + this.LABEL_MARGIN_TOP,
-					style: fontSize
-				}).textContent = label;
-			}
-		}
-
-		this.labelsScale = this.buildLabelsScale(width, renderLabels, topPoint, bottomPoint);
-
-		if (!this.allLabelsScale)
-			this.allLabelsScale = this.labelsScale;
-	}
-
-	private buildLabelsScale(width: number,
-									 renderLabels: boolean,
-									 topPoint: number,
-									 bottomPoint: number)
-	{
-		let labelScale = [];
-		let fontSize = `font-size: ${this.config.fontSize}px`,
-			 stepScaleX = renderLabels ?
-				  (width - this.labelWidth / 2) / (this.labels.length - 1) :
-				  width / (this.endCategoryIndex - this.startCategoryIndex),
+		let labelScale = [],
+			 stepScaleX = (width - this.labelWidth / 2) / (this.endCategoryIndex - this.startCategoryIndex),
 			 scaleX = 0;
 
-		for (let i = this.startCategoryIndex; i <= this.endCategoryIndex; i++)
+		for (let i = this.startCategoryIndex, index = 0, stepIndex = this.endCategoryIndex;
+			  i <= this.endCategoryIndex;
+			  i++, index++, stepIndex -= step)
 		{
 			labelScale.push({x: scaleX, label: this.labels[i], index: i});
 
@@ -190,18 +157,28 @@ export default class XAxis {
 					"shape-rendering": "crispEdges"
 				});
 
-			if (renderLabels)
+			let labelForRender = this.labels[i];
+			let x = scaleX + this.labelWidth / 2;  // so that the labels is aligned in between the construction points
+
+			if (step > 1)
 			{
-				createSVGNode("text", this.group, {
-					x: scaleX + this.labelWidth / 2,  // so that the labels is aligned in between the construction points
-					y: bottomPoint + this.LABEL_MARGIN_TOP,
-					style: fontSize
-				}).textContent = this.labels[i];
+				labelForRender = this.labels[stepIndex];
+				x = width - index * (this.labelMargin + this.labelWidth);
 			}
+
+			createSVGNode("text", this.group, {
+				x: x,
+				y: bottomPoint + this.LABEL_MARGIN_TOP,
+				style: fontSize
+			}).textContent = labelForRender;
+
 			scaleX += stepScaleX;
 		}
 
-		return labelScale;
+		this.labelsScale = labelScale;
+
+		if (!this.allLabelsScale)
+			this.allLabelsScale = this.labelsScale;
 	}
 
 	public getStartCategoryIndex()
