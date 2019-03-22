@@ -27,6 +27,15 @@
 		height: 20px;
 		display: inline-block;
 		margin-right: 10px;
+		box-sizing: border-box;
+
+
+		&--selected
+		{
+		  border-style: solid;
+		  border-width: 3px;
+		  background-color: transparent !important;
+		}
 	 }
   }
 

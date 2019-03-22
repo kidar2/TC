@@ -38,7 +38,7 @@ export default class YAxis {
 		this.config = {...YAxisDefaultConfig, ...config};
 		this.parentNode = svgNode;
 		this.marginLeft = 40;
-		this.animate_delta = 50;
+		this.animate_delta = 70;
 	}
 
 	getTopValue()
@@ -110,7 +110,7 @@ export default class YAxis {
 			{
 				let baseGroupProps = {
 					begin: "DOMNodeInserted",
-					dur: "0.33s",
+					dur: "0.5s",
 					fill: "freeze",
 					repeatCount: "1"
 				};
@@ -150,13 +150,13 @@ export default class YAxis {
 		{
 			let baseGroupProps = {
 				begin: "DOMNodeInserted",
-				dur: "0.33s",
 				fill: "freeze",
 				repeatCount: "1"
 			};
 			let animateOpacity = createSVGNode("animate", null, {
 				attributeName: "opacity",
 				attributeType: "CSS",
+				dur: "0.2s",
 				"from": "0",
 				to: "1",
 				...baseGroupProps
@@ -164,6 +164,7 @@ export default class YAxis {
 
 			let animateTransform = createSVGNode("animateTransform", null, {
 				type: "translate",
+				dur: "0.33s",
 				attributeName: "transform",
 				"from": "0 " + (animateType * this.animate_delta),
 				to: "0 0",

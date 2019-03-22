@@ -30,7 +30,7 @@ export default class Legend {
 		{
 			let item = document.createElement("div");
 			item.classList.add('chart__legend__item');
-			item.innerHTML = `<span class="chart__legend__item__circle" style="background-color: ${series.config.color}"> 
+			item.innerHTML = `<span class="chart__legend__item__circle" style="background-color: ${series.config.color}; border-color:${series.config.color}"> 
 <svg  style="enable-background:new 0 0 512 512;" version="1.1" viewBox="0 0 512 512" xml:space="preserve"
      xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><style type="text/css">
 	.st0{fill:white;}
@@ -48,7 +48,12 @@ export default class Legend {
 		let item = (e.currentTarget as HTMLElement);
 		let id = item.getAttribute("series-id");
 		let svgItem = item.querySelector("svg");
+		let circle = item.querySelector(".chart__legend__item__circle");
 		svgItem.style.display = svgItem.style.display ? '' : 'none';
+		if (svgItem.style.display == 'none')
+			circle.classList.add('chart__legend__item__circle--selected');
+		else
+			circle.classList.remove('chart__legend__item__circle--selected');
 		if (id && this.itemClickCallback)
 			this.itemClickCallback(id);
 	}
