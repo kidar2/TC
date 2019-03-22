@@ -181,8 +181,7 @@ export default class YAxis {
 			group.appendChild(animateTransform);
 			group.appendChild(animateOpacity);
 		}
-
-		this.parentNode.appendChild(group);
+		this.parentNode.insertBefore(this.group, this.parentNode.querySelector('g[type="area"]'));
 	}
 
 	public update(height: number, width: number, animate: boolean)

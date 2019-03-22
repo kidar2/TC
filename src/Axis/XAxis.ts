@@ -93,8 +93,8 @@ export default class XAxis {
 					  endScrollPosition: number)
 	{
 		removeNode(this.group);
-		this.group = createSVGNode("g", this.parentNode, {type: "xAxis"});
-
+		this.group = createSVGNode("g", null, {type: "xAxis"});
+		this.parentNode.insertBefore(this.group, this.parentNode.querySelector('g[type="area"]'));
 
 		width -= this.config.marginRight + marginLeft;
 
