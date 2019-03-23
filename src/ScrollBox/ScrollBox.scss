@@ -22,15 +22,19 @@
   &-left-resizer,
   &-right-resizer
   {
-	 background-color: #adcbe0b5;
+	 background-color: #DDEAF3;
 	 width: 5px;
 	 height: 100%;
 	 cursor: e-resize;
+	 opacity: 0.8;
   }
 
   &-center
   {
 	 height: 100%;
 	 flex-grow: 1;
+	 border-top: 1px solid #DDEAF3;
+	 border-bottom: 1px solid #DDEAF3;
+	 box-sizing: border-box;
   }
 }

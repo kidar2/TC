@@ -5,6 +5,18 @@ import {CategoriesType} from "./Axis/XAxis";
 
 function main()
 {
+
+	let div = document.createElement("div");
+	div.innerHTML = `<select value="">
+	<option value="">Day mode</option>
+	<option value="night-mode">Night mode</option>
+</select>`;
+	document.body.appendChild(div);
+	let select = div.querySelector("select");
+	select.addEventListener('change', () => {
+			document.body.className = select.value;
+	});
+
 	let w = Math.max(document.body.offsetWidth - 300, 300),
 		 charts: Chart[] = [];
 

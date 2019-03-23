@@ -8,9 +8,81 @@ html, body
   margin: 0;
   font-family: "Open Sans", Arial, Helvetica, sans-serif;
   letter-spacing: 0;
+
   .chart
   {
 	 margin: 20px 0 0 20px;
+  }
+}
+
+
+body.night-mode
+{
+  background-color: #242F3E;
+
+  .chart
+  {
+	 &__tooltip-obj
+	 {
+		stroke: #3B4A5A !important;
+	 }
+
+	 svg
+	 {
+		fill: #526475;
+
+		g[type="yAxis"] > line
+		{
+		  stroke: #273342;
+		}
+	 }
+
+	 &__title
+	 {
+		color: #FBFBFB
+	 }
+
+	 &__legend
+	 {
+		color: #E8ECEE;
+
+		&__item
+		{
+		  border-color: #334557;
+
+		  &:hover
+		  {
+			 background-color: #1F2A38;
+		  }
+		}
+	 }
+
+	 &__scroll
+	 {
+		&-left,
+		&-right
+		{
+		  background-color: #40566B;
+		}
+
+		&-left-resizer,
+		&-right-resizer
+		{
+		  background-color: #40566B;
+		}
+
+		&-center
+		{
+		  border-color: #40566B;
+		}
+	 }
+
+
+	 &__tooltip
+	 {
+		background-color: #253241;
+		color: #FBFBFB
+	 }
   }
 }
 
