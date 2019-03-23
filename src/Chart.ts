@@ -7,6 +7,7 @@ import Tooltip from "./ToolTip/Tooltip";
 import Legend from "./Legend/Legend";
 import ScrollBox from "./ScrollBox/ScrollBox";
 
+const IsEdge = window.navigator.userAgent.indexOf(' Edge/') > -1;
 
 export interface IChartData {
 	columns: [][],
@@ -238,6 +239,8 @@ export default class Chart {
 
 	public update(animateAxises: boolean = true, sereisVisibleChangedId: string = null)
 	{
+		if (IsEdge)
+			animateAxises = false;
 		this.yAxis.prepare(this.min, this.max);
 		this.xAxis.prepare(this.getPlotAreaWidth(), this.yAxis.getWidth());
 
@@ -246,8 +249,8 @@ export default class Chart {
 
 		this.series.forEach(s =>
 		{
-			let animateVisible = sereisVisibleChangedId == s.id,
-				 animateSize = sereisVisibleChangedId && !animateVisible;
+			let animateVisible = !IsEdge && sereisVisibleChangedId == s.id,
+				 animateSize = !IsEdge && sereisVisibleChangedId && !animateVisible;
 			s.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.getMarginLeft(), animateVisible, animateSize);
 		});
 		if (!this.xAxis.allLabelsVisible)
