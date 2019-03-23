@@ -7,6 +7,7 @@ function main()
 {
 
 	let div = document.createElement("div");
+	div.className = 'select-theme-div';
 	div.innerHTML = `<select value="">
 	<option value="">Day mode</option>
 	<option value="night-mode">Night mode</option>
