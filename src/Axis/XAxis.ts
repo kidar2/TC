@@ -47,6 +47,8 @@ export default class XAxis {
 	private endCategoryIndex: number;
 	private animate_delta: number;
 
+	private timeoutid: any;
+
 
 	public constructor(config: IXAxisConfig, svgNode: SVGElement)
 	{
@@ -90,7 +92,6 @@ export default class XAxis {
 					  endScrollPosition: number)
 	{
 
-
 		width -= this.config.marginRight + marginLeft;
 
 		let oldStart = this.startCategoryIndex,
@@ -124,7 +125,7 @@ export default class XAxis {
 			animate = oldStart + oldEnd < this.startCategoryIndex + this.endCategoryIndex ? -1 : 1;
 		}
 
-		this.hideGroup(this.group, animate);
+		let oldGroup = this.group;
 		this.group = createSVGNode("g", null, {type: "xAxis"});
 
 
@@ -171,7 +172,26 @@ export default class XAxis {
 		if (!this.allLabelsScale)
 			this.allLabelsScale = this.labelsScale;
 
-		this.showGroup(this.group, -animate);
+		this.renderGroups(oldGroup, this.group, animate);
+	}
+
+	oldGroup: SVGElement;
+
+	renderGroups(oldGroup: SVGElement, newGroup: SVGElement, animate: number)
+	{
+		if (this.timeoutid)
+		{
+			if (this.oldGroup)
+				removeNode(this.oldGroup);
+			clearTimeout(this.timeoutid);
+		}
+		this.oldGroup = oldGroup;
+		this.timeoutid = setTimeout(() =>
+		{
+			this.timeoutid = null;
+			this.hideGroup(oldGroup, animate);
+			this.showGroup(newGroup, -animate);
+		}, 30);
 	}
 
 

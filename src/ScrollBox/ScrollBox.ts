@@ -181,6 +181,7 @@ export default class ScrollBox {
 			this.rightWidth = rightw;
 			this.rightNode.style.width = this.rightWidth + 'px';
 		}
+		this.changedCallback();
 	}
 
 	private checkMinSize(newLeftWidth: number, newRightWidth: number)

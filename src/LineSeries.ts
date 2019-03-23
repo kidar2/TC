@@ -19,7 +19,8 @@ export default class LineSeries {
 	private readonly hoverCircle: SVGElement;
 	private indexToPoint: IHash<number>;
 	visible: boolean;
-
+	averageValueOnVisiblePart: number;
+	private nodesPoints: { x: number, y: number }[][];
 
 	public constructor(config: ISeriesConfig, parentNode: SVGElement)
 	{
@@ -45,11 +46,14 @@ export default class LineSeries {
 		if (this.nodes)
 			this.nodes.forEach(n => removeNode(n));
 
+		let sum = 0, countNotNull = 0;
 		this.nodes = [];
+		this.nodesPoints = [];
 		if (this.visible)
 		{
 			this.indexToPoint = {};
 			let points = "",
+				 pointsArr = [],
 				 topValue = yAxis.getTopValue(),
 				 bottomValue = yAxis.getBottomValue();
 
@@ -59,16 +63,21 @@ export default class LineSeries {
 
 				if (value != null)
 				{
+					sum += value;
+					countNotNull++;
+
 					let y = areaHeight - yAxis.calcHeightByValue(value, topValue, bottomValue),
 						 x = xAxis.getXByIndex(i) + marginLeft;
 					if (points)
 						points += ', ';
 					points += x + " " + y;
 
+					pointsArr.push({x, y});
 					this.indexToPoint[i] = y;
 				}
 				else if (points)
 				{
+					this.nodesPoints.push(pointsArr);
 					this.nodes.push(createSVGNode("polyline", this.parentNode, {
 						points,
 						"series-id": this.id,
@@ -77,10 +86,12 @@ export default class LineSeries {
 						'stroke-width': '2'
 					}));
 					points = "";
+					pointsArr = [];
 				}
 			}
 
 			if (points)
+			{
 				this.nodes.push(createSVGNode("polyline", this.parentNode, {
 					points,
 					"series-id": this.id,
@@ -88,16 +99,22 @@ export default class LineSeries {
 					stroke: this.config.color,
 					'stroke-width': '2'
 				}));
+				this.nodesPoints.push(pointsArr);
+			}
 		}
+
+		this.averageValueOnVisiblePart = sum / countNotNull;
 	}
+
+	getAverageValue()
+	{
+		return this.averageValueOnVisiblePart;
+	}
+
 
 	setIsVisible(value: boolean)
 	{
 		this.visible = value;
-		if (value)
-			this.nodes.forEach(n => this.parentNode.appendChild(n));
-		else
-			this.nodes.forEach(n => removeNode(n));
 	}
 
 	showToolTipPoint(category: ICategory)
