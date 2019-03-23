@@ -92,6 +92,7 @@ export default class ScrollBox {
 			{
 				let polyline = nodes.item(i).cloneNode() as SVGElement;
 				polyline.setAttribute('stroke-width', '1');
+				polyline.setAttribute('fill', 'transparent');
 				polyline.setAttribute("shape-rendering", "geometricPrecision");
 				this.seriesGroup.appendChild(polyline);
 			}

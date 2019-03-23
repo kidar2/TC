@@ -48,6 +48,7 @@ export default class XAxis {
 	private animate_delta: number;
 
 	private timeoutid: any;
+	private animatingNode: SVGElement;
 
 
 	public constructor(config: IXAxisConfig, svgNode: SVGElement)
@@ -211,6 +212,11 @@ export default class XAxis {
 		{
 			if (animateType != null)
 			{
+				if (this.animatingNode)
+					removeNode(this.animatingNode);
+
+				this.animatingNode = group;
+
 				let baseGroupProps = {
 					begin: "DOMNodeInserted",
 					fill: "freeze",
@@ -234,10 +240,7 @@ export default class XAxis {
 					...baseGroupProps
 				});
 
-				animateTransform.addEventListener('endEvent', () =>
-				{
-					this.parentNode.removeChild(group);
-				}, false);
+				animateTransform.addEventListener('endEvent', () => removeNode(group), false);
 
 
 				group.appendChild(animateTransform);
