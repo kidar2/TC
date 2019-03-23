@@ -21,10 +21,18 @@ export default class LineSeries {
 	maxOnVisiblePart: number;
 	private axisMax: number;
 	private axisMin: number;
+	private yAxis: YAxis;
+	private xAxis: XAxis;
+	private nodesPoints: { x: number, y: number }[][];
 
 
-	public constructor(config: ISeriesConfig, parentNode: SVGElement)
+	public constructor(config: ISeriesConfig,
+							 yAxis: YAxis,
+							 xAxis: XAxis,
+							 parentNode: SVGElement)
 	{
+		this.yAxis = yAxis;
+		this.xAxis = xAxis;
 		this.visible = true;
 		this.config = config;
 		this.parentNode = parentNode;
@@ -41,27 +49,26 @@ export default class LineSeries {
 	public update(areaHeight: number,
 					  areaWidth: number,
 					  marginLeft: number,
-					  yAxis: YAxis,
-					  xAxis: XAxis,
 					  animateVisible: boolean,
 					  animateSize: boolean)
 	{
 
-		this.axisMax = yAxis.getTopValue();
-		this.axisMin = yAxis.getBottomValue();
+		this.axisMax = this.yAxis.getTopValue();
+		this.axisMin = this.yAxis.getBottomValue();
 
 		if (this.visible)
 		{
 			this.hideNodes(this.nodes, false, areaHeight);
 			this.nodes = [];
+			let nodesPoints: { x: number, y: number }[][] = [];
 			this.maxOnVisiblePart = Number.MIN_VALUE;
 			this.indexToPoint = {};
 			let points = "",
 				 pointsArr = [],
-				 topValue = yAxis.getTopValue(),
-				 bottomValue = yAxis.getBottomValue();
+				 topValue = this.yAxis.getTopValue(),
+				 bottomValue = this.yAxis.getBottomValue();
 
-			for (let i = xAxis.getStartCategoryIndex(); i <= xAxis.getEndCategoryIndex(); i++)
+			for (let i = this.xAxis.getStartCategoryIndex(); i <= this.xAxis.getEndCategoryIndex(); i++)
 			{
 				let value = this.config.data[i] as number;
 
@@ -70,8 +77,8 @@ export default class LineSeries {
 					if (value > this.maxOnVisiblePart)
 						this.maxOnVisiblePart = value;
 
-					let y = areaHeight - yAxis.calcHeightByValue(value, topValue, bottomValue),
-						 x = xAxis.getXByIndex(i) + marginLeft;
+					let y = areaHeight - this.yAxis.calcHeightByValue(value, topValue, bottomValue),
+						 x = this.xAxis.getXByIndex(i) + marginLeft;
 					if (points)
 						points += ', ';
 					points += x + " " + y;
@@ -81,6 +88,7 @@ export default class LineSeries {
 				}
 				else if (points)
 				{
+					nodesPoints.push(pointsArr);
 					this.nodes.push(createSVGNode("polyline", null, {
 						points,
 						"series-id": this.id,
@@ -95,6 +103,7 @@ export default class LineSeries {
 
 			if (points)
 			{
+				nodesPoints.push(pointsArr);
 				this.nodes.push(createSVGNode("polyline", null, {
 					points,
 					"series-id": this.id,
@@ -103,7 +112,37 @@ export default class LineSeries {
 					'stroke-width': '2'
 				}));
 			}
-			this.showNodes(this.nodes, animateVisible, areaHeight);
+
+			if (animateSize && this.nodesPoints)
+			{
+				this.nodes.forEach((n, index) =>
+				{
+					let fromPoints = this.nodesPoints[index].map(p => p.x + " " + p.y).join(','),
+						 toPoints = nodesPoints[index].map(p => p.x + " " + p.y).join(',');
+					let animatePoints = createSVGNode("animate", n, {
+						attributeName: "points",
+						dur: "0.3s",
+						"from": fromPoints,
+						"to": toPoints,
+						begin: "DOMNodeInserted",
+						fill: "freeze",
+						repeatCount: "1"
+					});
+					n.setAttribute("points", fromPoints);
+
+					this.parentNode.appendChild(n);
+
+					animatePoints.addEventListener('end', () =>
+					{
+						n.setAttribute("points", toPoints);
+						removeNode(animatePoints);
+					}, false);
+				});
+			}
+			else
+				this.showNodes(this.nodes, animateVisible, areaHeight);
+
+			this.nodesPoints = nodesPoints;
 		}
 		else
 			this.hideNodes(this.nodes, animateVisible, areaHeight);

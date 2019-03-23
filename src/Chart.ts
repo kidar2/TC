@@ -90,11 +90,14 @@ export default class Chart {
 						data: c,
 						name: this.config.data.names[id],
 						color: this.config.data.colors[id]
-					}, this.chartArea));
+					}, this.yAxis, this.xAxis, this.chartArea));
 				else
 					console.log(`Unsupported series type '${this.config.data.types[id]}' of '${id}'`)
 			}
 		});
+
+		if (!this.xAxis)
+			throw new Error('Category axis (X) is not find');
 
 		this.updateMinMax();
 		this.scrollBox = new ScrollBox(this.root, this.svg, () => this.onScrollChanged());
@@ -244,8 +247,8 @@ export default class Chart {
 		this.series.forEach(s =>
 		{
 			let animateVisible = sereisVisibleChangedId == s.id,
-				 animateSize = sereisVisibleChangedId && sereisVisibleChangedId != s.id;
-			s.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.getMarginLeft(), this.yAxis, this.xAxis, animateVisible, animateSize);
+				 animateSize = sereisVisibleChangedId && !animateVisible;
+			s.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.getMarginLeft(), animateVisible, animateSize);
 		});
 		if (!this.xAxis.allLabelsVisible)
 			this.scrollBox.update(
