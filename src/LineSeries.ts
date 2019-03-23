@@ -4,7 +4,6 @@ import XAxis, {ICategory} from "./Axis/XAxis";
 
 interface ISeriesConfig {
 	data: Array<string | number>;
-	type: string;
 	name: string;
 	color: string;
 }
@@ -41,8 +40,10 @@ export default class LineSeries {
 					  areaWidth: number,
 					  marginLeft: number,
 					  yAxis: YAxis,
-					  xAxis: XAxis)
+					  xAxis: XAxis,
+					  isLegendClick: boolean)
 	{
+
 		if (this.nodes)
 			this.nodes.forEach(n => removeNode(n));
 
@@ -111,11 +112,6 @@ export default class LineSeries {
 		return this.averageValueOnVisiblePart;
 	}
 
-
-	setIsVisible(value: boolean)
-	{
-		this.visible = value;
-	}
 
 	showToolTipPoint(category: ICategory)
 	{

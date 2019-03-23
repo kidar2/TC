@@ -85,12 +85,14 @@ export default class Chart {
 			}
 			else
 			{
-				this.series.push(new LineSeries({
-					data: c,
-					type: this.config.data.types[id],
-					name: this.config.data.names[id],
-					color: this.config.data.colors[id]
-				}, this.chartArea));
+				if (this.config.data.types[id] == 'line')
+					this.series.push(new LineSeries({
+						data: c,
+						name: this.config.data.names[id],
+						color: this.config.data.colors[id]
+					}, this.chartArea));
+				else
+					console.log(`Unsupported series type '${this.config.data.types[id]}' of '${id}'`)
 			}
 		});
 
@@ -98,8 +100,8 @@ export default class Chart {
 		this.scrollBox = new ScrollBox(this.root, this.svg, () => this.onScrollChanged());
 
 		this.setSize(this.config.width, this.config.height);
-		this.svg.addEventListener("mousemove", (e: MouseEvent) => this._onMouseMove(e));
-		this.svg.addEventListener("mouseout", () => this._hideToolTip());
+		this.svg.addEventListener("mousemove", (e: MouseEvent) => this.onMouseMove(e));
+		this.svg.addEventListener("mouseout", () => this.hideToolTip());
 
 		this.tooltip = new Tooltip(this.root);
 		this.legend = new Legend(this.series, this.root, this.legendHeight, (serId: string) => this.onLegendItemClick(serId));
@@ -141,21 +143,26 @@ export default class Chart {
 		this.max = max;
 	}
 
-	_hideToolTip()
+	public hideToolTip()
 	{
 		this.tooltip.hide();
 		this.xAxis.hideTooltipLine();
 		this.series.forEach(s => s.hideToolTipPoint());
 	}
 
-	_onMouseMove(e: MouseEvent)
+	/**
+	 * For tooltips
+	 * @param e
+	 * @private
+	 */
+	private onMouseMove(e: MouseEvent)
 	{
 		let x = e.offsetX - this.getMarginLeft();
 		let category = x >= 0 ? this.xAxis.getCategory(x) : null;
 
 		if (!category)
 		{
-			this._hideToolTip();
+			this.hideToolTip();
 		}
 		else
 		{
@@ -183,31 +190,31 @@ export default class Chart {
 		}
 	}
 
-	onLegendItemClick(serId: string)
+	private onLegendItemClick(serId: string)
 	{
 		let s = this.series.find(s => s.id == serId);
-		s.setIsVisible(!s.visible);
+		s.visible = !s.visible;
 		this.updateMinMax();
-		this.update(true);
+		this.update(true, true);
 		this.scrollBox.updateSeriesVisible(s);
 	}
 
-	getPlotAreaHeight()
+	public getPlotAreaHeight()
 	{
 		return this.config.height - this.legendHeight - this.titleHeight - this.xAxis.LABEL_MARGIN_TOP - (this.xAxis.allLabelsVisible ? 0 : this.scrollBoxHeight);
 	}
 
-	getSVGNodeHeight()
+	public getSVGNodeHeight()
 	{
 		return this.config.height - this.legendHeight - this.titleHeight - (this.xAxis.allLabelsVisible ? 0 : this.scrollBoxHeight);
 	}
 
-	getPlotAreaWidth()
+	public getPlotAreaWidth()
 	{
 		return this.config.width - this.yAxis.getWidth();
 	}
 
-	getMarginLeft()
+	public getMarginLeft()
 	{
 		return this.yAxis.getWidth() + this.xAxis.labelWidth / 2;
 	}
@@ -226,15 +233,15 @@ export default class Chart {
 		this.svg.style.height = svgHeight + 'px';
 	}
 
-	public update(animate: boolean)
+	public update(animate: boolean = true, isLegendClick: boolean = false)
 	{
 		this.yAxis.prepare(this.min, this.max);
 		this.xAxis.prepare(this.getPlotAreaWidth(), this.yAxis.getWidth());
 
 		this.yAxis.update(this.getPlotAreaHeight(), this.config.width + 50, animate);
-		this.xAxis.update(this.getPlotAreaHeight(), this.yAxis.heightOfLabels, this.getPlotAreaWidth(), this.yAxis.getWidth(), this.scrollBox.getLeftPosition(), this.scrollBox.getRightPosition());
+		this.xAxis.update(this.getPlotAreaHeight(), this.yAxis.heightOfLabels, this.getPlotAreaWidth(), this.yAxis.getWidth(), this.scrollBox.getLeftPosition(), this.scrollBox.getRightPosition(), animate);
 
-		this.series.forEach(s => s.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.getMarginLeft(), this.yAxis, this.xAxis));
+		this.series.forEach(s => s.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.getMarginLeft(), this.yAxis, this.xAxis, isLegendClick));
 		if (!this.xAxis.allLabelsVisible)
 			this.scrollBox.update(
 				 this.config.width,

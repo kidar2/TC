@@ -89,7 +89,8 @@ export default class XAxis {
 					  width: number,
 					  marginLeft: number,
 					  startScrollPosition: number,
-					  endScrollPosition: number)
+					  endScrollPosition: number,
+					  animate: boolean)
 	{
 
 		width -= this.config.marginRight + marginLeft;
@@ -115,14 +116,15 @@ export default class XAxis {
 			this.endCategoryIndex = this.labels.length - 1;
 		}
 
-		if (oldStart == this.startCategoryIndex && oldEnd == this.endCategoryIndex)
-			return;
+		if (animate)
+			if (oldStart == this.startCategoryIndex && oldEnd == this.endCategoryIndex)
+				return;
 
-		let animate = null;
+		let animateType = null;
 
-		if (this.group && (oldStart != this.startCategoryIndex || oldEnd != this.endCategoryIndex))
+		if (animate && this.group && (oldStart != this.startCategoryIndex || oldEnd != this.endCategoryIndex))
 		{
-			animate = oldStart + oldEnd < this.startCategoryIndex + this.endCategoryIndex ? -1 : 1;
+			animateType = oldStart + oldEnd < this.startCategoryIndex + this.endCategoryIndex ? -1 : 1;
 		}
 
 		let oldGroup = this.group;
@@ -172,26 +174,34 @@ export default class XAxis {
 		if (!this.allLabelsScale)
 			this.allLabelsScale = this.labelsScale;
 
-		this.renderGroups(oldGroup, this.group, animate);
+		this.renderGroups(oldGroup, this.group, animateType);
 	}
 
 	oldGroup: SVGElement;
 
 	renderGroups(oldGroup: SVGElement, newGroup: SVGElement, animate: number)
 	{
-		if (this.timeoutid)
+		if (animate != null)
 		{
-			if (this.oldGroup)
-				removeNode(this.oldGroup);
-			clearTimeout(this.timeoutid);
+			if (this.timeoutid)
+			{
+				if (this.oldGroup)
+					removeNode(this.oldGroup);
+				clearTimeout(this.timeoutid);
+			}
+			this.oldGroup = oldGroup;
+			this.timeoutid = setTimeout(() =>
+			{
+				this.timeoutid = null;
+				this.hideGroup(oldGroup, animate);
+				this.showGroup(newGroup, -animate);
+			}, 30);
 		}
-		this.oldGroup = oldGroup;
-		this.timeoutid = setTimeout(() =>
+		else
 		{
-			this.timeoutid = null;
-			this.hideGroup(oldGroup, animate);
-			this.showGroup(newGroup, -animate);
-		}, 30);
+			removeNode(oldGroup);
+			this.parentNode.insertBefore(this.group, this.parentNode.querySelector('g[type="area"]'));
+		}
 	}
 
 
