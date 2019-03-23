@@ -4,7 +4,7 @@ import LineSeries from "../LineSeries";
 
 
 export default class ScrollBox {
-	private parentNode: HTMLElement;
+	private readonly parentNode: HTMLElement;
 	private root: HTMLElement;
 	private svg: SVGSVGElement;
 	private originalSVGNode: SVGSVGElement;
@@ -14,8 +14,8 @@ export default class ScrollBox {
 	private rightResizer: HTMLElement;
 	private leftWidth: number;
 	private rightWidth: number;
-	private leftNode: HTMLElement;
-	private rightNode: HTMLElement;
+	private readonly leftNode: HTMLElement;
+	private readonly rightNode: HTMLElement;
 	private resizingNode: HTMLElement;
 
 	private mouseMoveBinded: any;
