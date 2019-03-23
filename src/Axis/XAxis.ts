@@ -45,6 +45,7 @@ export default class XAxis {
 	DEFAULT_LABEL_MARGIN: number;  //default margin between labels
 	private startCategoryIndex: number;
 	private endCategoryIndex: number;
+	private animate_delta: number;
 
 
 	public constructor(config: IXAxisConfig, svgNode: SVGElement)
@@ -57,6 +58,7 @@ export default class XAxis {
 		this.tooltipLine = createSVGNode("line", null, {stroke: this.config.color});
 		this.tooltipLine.classList.add('chart__tooltip-obj');
 		this.labelMargin = this.DEFAULT_LABEL_MARGIN;
+		this.animate_delta = 80;
 		for (let i = 1; i < this.config.categories.length; i++)
 		{
 			if (this.config.type == CategoriesType.date)
@@ -76,12 +78,7 @@ export default class XAxis {
 		if (this.labelWidth == null)
 			this.labelWidth = calcSize(this.labels, this.config.fontSize).width;
 		this.countView = Math.round(width / (this.labelWidth + this.labelMargin));
-		this.allLabelsVisible = this.calcStep() <= 1;
-	}
-
-	calcStep()
-	{
-		return Math.round((this.labels.length - 1) / this.countView);
+		this.allLabelsVisible = (this.labels.length - 1) / this.countView <= 1;
 	}
 
 
@@ -92,29 +89,47 @@ export default class XAxis {
 					  startScrollPosition: number,
 					  endScrollPosition: number)
 	{
-		removeNode(this.group);
-		this.group = createSVGNode("g", null, {type: "xAxis"});
-		this.parentNode.insertBefore(this.group, this.parentNode.querySelector('g[type="area"]'));
+
 
 		width -= this.config.marginRight + marginLeft;
 
-		let fontSize = `font-size: ${this.config.fontSize}px`;
-
-		this.startCategoryIndex = 0;
-		this.endCategoryIndex = this.labels.length - 1;
-
+		let oldStart = this.startCategoryIndex,
+			 oldEnd = this.endCategoryIndex;
 
 		if (startScrollPosition || endScrollPosition)
 		{
 			if (startScrollPosition)
 				this.startCategoryIndex = this.getIndexOfCategoryByPosition(startScrollPosition);
+			else
+				this.startCategoryIndex = 0;
 
 			if (endScrollPosition)
 				this.endCategoryIndex = this.getIndexOfCategoryByPosition(endScrollPosition);
+			else
+				this.endCategoryIndex = this.labels.length - 1;
 		}
+		else
+		{
+			this.startCategoryIndex = 0;
+			this.endCategoryIndex = this.labels.length - 1;
+		}
+
+		if (oldStart == this.startCategoryIndex && oldEnd == this.endCategoryIndex)
+			return;
+
+		let animate = null;
+
+		if (this.group && (oldStart != this.startCategoryIndex || oldEnd != this.endCategoryIndex))
+		{
+			animate = oldStart + oldEnd < this.startCategoryIndex + this.endCategoryIndex ? -1 : 1;
+		}
+
+		this.hideGroup(this.group, animate);
+		this.group = createSVGNode("g", null, {type: "xAxis"});
 
 
 		let labelScale = [],
+			 fontSize = `font-size: ${this.config.fontSize}px`,
 			 stepScaleX = (width - this.labelWidth / 2) / (this.endCategoryIndex - this.startCategoryIndex),
 			 sumXLabel = 0,
 			 scaleX = 0;
@@ -155,6 +170,92 @@ export default class XAxis {
 
 		if (!this.allLabelsScale)
 			this.allLabelsScale = this.labelsScale;
+
+		this.showGroup(this.group, -animate);
+	}
+
+
+	private hideGroup(group: SVGElement, animateType: number)
+	{
+		if (group)
+		{
+			if (animateType != null)
+			{
+				let baseGroupProps = {
+					begin: "DOMNodeInserted",
+					fill: "freeze",
+					repeatCount: "1"
+				};
+				let animateOpacity = createSVGNode("animate", null, {
+					attributeName: "opacity",
+					attributeType: "CSS",
+					dur: "0.3s",
+					"from": "1",
+					to: "0",
+					...baseGroupProps
+				});
+
+				let animateTransform = createSVGNode("animateTransform", null, {
+					type: "translate",
+					attributeName: "transform",
+					dur: "0.7s",
+					"from": "0 0",
+					to: (animateType * this.animate_delta) + " 0",
+					...baseGroupProps
+				});
+
+				animateTransform.addEventListener('endEvent', () =>
+				{
+					this.parentNode.removeChild(group);
+				}, false);
+
+
+				group.appendChild(animateTransform);
+				group.appendChild(animateOpacity);
+			}
+			else
+				this.parentNode.removeChild(group);
+		}
+	}
+
+	private showGroup(group: SVGElement, animateType: number)
+	{
+		if (animateType != null)
+		{
+			let baseGroupProps = {
+				begin: "DOMNodeInserted",
+				fill: "freeze",
+				repeatCount: "1"
+			};
+			let animateOpacity = createSVGNode("animate", null, {
+				attributeName: "opacity",
+				attributeType: "CSS",
+				dur: "0.2s",
+				"from": "0",
+				to: "1",
+				...baseGroupProps
+			});
+
+			let animateTransform = createSVGNode("animateTransform", null, {
+				type: "translate",
+				dur: "0.33s",
+				attributeName: "transform",
+				"from": (animateType * this.animate_delta) + " 0",
+				to: "0 0",
+				...baseGroupProps
+			});
+
+			animateTransform.addEventListener('endEvent', () =>
+			{
+				group.removeChild(animateTransform);
+				group.removeChild(animateOpacity);
+			}, false);
+
+
+			group.appendChild(animateTransform);
+			group.appendChild(animateOpacity);
+		}
+		this.parentNode.insertBefore(this.group, this.parentNode.querySelector('g[type="area"]'));
 	}
 
 	public getStartCategoryIndex()
