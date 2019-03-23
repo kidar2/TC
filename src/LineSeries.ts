@@ -18,8 +18,10 @@ export default class LineSeries {
 	private readonly hoverCircle: SVGElement;
 	private indexToPoint: IHash<number>;
 	visible: boolean;
-	averageValueOnVisiblePart: number;
-	private nodesPoints: { x: number, y: number }[][];
+	maxOnVisiblePart: number;
+	private axisMax: number;
+	private axisMin: number;
+
 
 	public constructor(config: ISeriesConfig, parentNode: SVGElement)
 	{
@@ -41,17 +43,18 @@ export default class LineSeries {
 					  marginLeft: number,
 					  yAxis: YAxis,
 					  xAxis: XAxis,
-					  isLegendClick: boolean)
+					  animateVisible: boolean,
+					  animateSize: boolean)
 	{
 
-		if (this.nodes)
-			this.nodes.forEach(n => removeNode(n));
+		this.axisMax = yAxis.getTopValue();
+		this.axisMin = yAxis.getBottomValue();
 
-		let sum = 0, countNotNull = 0;
-		this.nodes = [];
-		this.nodesPoints = [];
 		if (this.visible)
 		{
+			this.hideNodes(this.nodes, false, areaHeight);
+			this.nodes = [];
+			this.maxOnVisiblePart = Number.MIN_VALUE;
 			this.indexToPoint = {};
 			let points = "",
 				 pointsArr = [],
@@ -64,8 +67,8 @@ export default class LineSeries {
 
 				if (value != null)
 				{
-					sum += value;
-					countNotNull++;
+					if (value > this.maxOnVisiblePart)
+						this.maxOnVisiblePart = value;
 
 					let y = areaHeight - yAxis.calcHeightByValue(value, topValue, bottomValue),
 						 x = xAxis.getXByIndex(i) + marginLeft;
@@ -78,8 +81,7 @@ export default class LineSeries {
 				}
 				else if (points)
 				{
-					this.nodesPoints.push(pointsArr);
-					this.nodes.push(createSVGNode("polyline", this.parentNode, {
+					this.nodes.push(createSVGNode("polyline", null, {
 						points,
 						"series-id": this.id,
 						fill: "transparent",
@@ -93,25 +95,110 @@ export default class LineSeries {
 
 			if (points)
 			{
-				this.nodes.push(createSVGNode("polyline", this.parentNode, {
+				this.nodes.push(createSVGNode("polyline", null, {
 					points,
 					"series-id": this.id,
 					fill: "transparent",
 					stroke: this.config.color,
 					'stroke-width': '2'
 				}));
-				this.nodesPoints.push(pointsArr);
 			}
+			this.showNodes(this.nodes, animateVisible, areaHeight);
 		}
-
-		this.averageValueOnVisiblePart = sum / countNotNull;
+		else
+			this.hideNodes(this.nodes, animateVisible, areaHeight);
 	}
 
-	getAverageValue()
+	private showNodes(nodes: SVGElement[], animate: boolean, areaHeight: number)
 	{
-		return this.averageValueOnVisiblePart;
+		if (!nodes || !nodes.length)
+			return;
+
+		if (!animate)
+			nodes.forEach(n => this.parentNode.appendChild(n));
+		else
+		{
+			nodes.forEach(n =>
+			{
+				let animateFromTop = (this.maxOnVisiblePart > (this.axisMax + this.axisMin) / 2),
+					 fromAttr = "0 " + (animateFromTop ? -areaHeight : areaHeight);
+
+				n.setAttribute("transform", `translate(${fromAttr})`);
+				let animateTransform = createSVGNode("animateTransform", n, {
+					type: "translate",
+					attributeName: "transform",
+					dur: "0.3s",
+					"from": fromAttr,
+					to: "0 0",
+					begin: "DOMNodeInserted",
+					fill: "freeze",
+					repeatCount: "1"
+				});
+
+				let animateOpacity = createSVGNode("animate", n, {
+					attributeName: "opacity",
+					attributeType: "CSS",
+					dur: "0.3s",
+					"from": "0",
+					to: "1",
+					begin: "DOMNodeInserted",
+					fill: "freeze",
+					repeatCount: "1"
+				});
+				animateTransform.addEventListener('endEvent', () =>
+				{
+					n.removeAttribute("transform");
+					removeNode(animateOpacity);
+					removeNode(animateTransform);
+				}, false);
+
+				this.parentNode.appendChild(n);
+			});
+		}
 	}
 
+	private hideNodes(nodes: SVGElement[], animate: boolean, areaHeight: number)
+	{
+		if (!nodes || !nodes.length)
+			return;
+
+		if (!animate)
+			nodes.forEach(n => removeNode(n));
+
+		else
+		{
+
+			nodes.forEach(n =>
+			{
+				let animateTop = this.maxOnVisiblePart > (this.axisMax + this.axisMin) / 2;
+
+				createSVGNode("animateTransform", n, {
+					type: "translate",
+					attributeName: "transform",
+					dur: "0.7s",
+					to: "0 " + (animateTop ? (-areaHeight) : areaHeight),
+					begin: "DOMNodeInserted",
+					fill: "freeze",
+					repeatCount: "1"
+				});
+
+				let animateOpacity = createSVGNode("animate", n, {
+					attributeName: "opacity",
+					attributeType: "CSS",
+					dur: "0.3s",
+					"from": "1",
+					to: "0",
+					begin: "DOMNodeInserted",
+					fill: "freeze",
+					repeatCount: "1"
+				});
+				animateOpacity.addEventListener('end', () =>
+				{
+					removeNode(animateOpacity.parentNode as HTMLElement);
+				}, false);
+			});
+		}
+	}
 
 	showToolTipPoint(category: ICategory)
 	{

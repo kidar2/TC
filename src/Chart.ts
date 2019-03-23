@@ -195,7 +195,7 @@ export default class Chart {
 		let s = this.series.find(s => s.id == serId);
 		s.visible = !s.visible;
 		this.updateMinMax();
-		this.update(true, true);
+		this.update(true, serId);
 		this.scrollBox.updateSeriesVisible(s);
 	}
 
@@ -233,15 +233,20 @@ export default class Chart {
 		this.svg.style.height = svgHeight + 'px';
 	}
 
-	public update(animate: boolean = true, isLegendClick: boolean = false)
+	public update(animateAxises: boolean = true, sereisVisibleChangedId: string = null)
 	{
 		this.yAxis.prepare(this.min, this.max);
 		this.xAxis.prepare(this.getPlotAreaWidth(), this.yAxis.getWidth());
 
-		this.yAxis.update(this.getPlotAreaHeight(), this.config.width + 50, animate);
-		this.xAxis.update(this.getPlotAreaHeight(), this.yAxis.heightOfLabels, this.getPlotAreaWidth(), this.yAxis.getWidth(), this.scrollBox.getLeftPosition(), this.scrollBox.getRightPosition(), animate);
+		this.yAxis.update(this.getPlotAreaHeight(), this.config.width + 50, animateAxises);
+		this.xAxis.update(this.getPlotAreaHeight(), this.yAxis.heightOfLabels, this.getPlotAreaWidth(), this.yAxis.getWidth(), this.scrollBox.getLeftPosition(), this.scrollBox.getRightPosition(), animateAxises);
 
-		this.series.forEach(s => s.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.getMarginLeft(), this.yAxis, this.xAxis, isLegendClick));
+		this.series.forEach(s =>
+		{
+			let animateVisible = sereisVisibleChangedId == s.id,
+				 animateSize = sereisVisibleChangedId && sereisVisibleChangedId != s.id;
+			s.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.getMarginLeft(), this.yAxis, this.xAxis, animateVisible, animateSize);
+		});
 		if (!this.xAxis.allLabelsVisible)
 			this.scrollBox.update(
 				 this.config.width,
