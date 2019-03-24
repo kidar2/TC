@@ -2,6 +2,7 @@ import './ScrollBox.scss';
 import {createNode} from "./../Util";
 import LineSeries from "../LineSeries";
 
+const IsTouch = !!('ontouchstart' in window);
 
 export default class ScrollBox {
 	private readonly parentNode: HTMLElement;
@@ -65,18 +66,19 @@ export default class ScrollBox {
 		this.rightNode = this.root.querySelector('.chart__scroll-right');
 		this.centerNode = this.root.querySelector('.chart__scroll-center');
 
-		this.leftResizer.addEventListener("mousedown", (e: MouseEvent) =>
+		let eventName = IsTouch ? 'touchstart' : 'mousedown';
+		this.leftResizer.addEventListener(eventName, (e: MouseEvent) =>
 		{
 			this.resizingNode = this.leftNode;
 			this.resizerMouseDown(e);
 		});
-		this.rightResizer.addEventListener("mousedown", (e: MouseEvent) =>
+		this.rightResizer.addEventListener(eventName, (e: MouseEvent) =>
 		{
 			this.resizingNode = this.rightNode;
 			this.resizerMouseDown(e);
 		});
 
-		this.centerNode.addEventListener("mousedown", (e: MouseEvent) =>
+		this.centerNode.addEventListener(eventName, (e: MouseEvent) =>
 		{
 			this.resizingNode = null;
 			this.resizerMouseDown(e);
@@ -136,24 +138,24 @@ export default class ScrollBox {
 
 	private resizerMouseDown(e: MouseEvent)
 	{
-		this.centerOffsetX = e.offsetX;
+		this.centerOffsetX = IsTouch ? (e as any).changedTouches[0].clientX - this.leftWidth + this.marginLeft : e.offsetX;
 		this.centerWidth = this.centerNode.offsetWidth;
-		window.addEventListener("mouseup", this.mouseUpBinded = this.mouseUp.bind(this));
-		window.addEventListener("mousemove", this.mouseMoveBinded = this.mouseMove.bind(this));
+		window.addEventListener(IsTouch ? 'touchend' : "mouseup", this.mouseUpBinded = this.mouseUp.bind(this));
+		window.addEventListener(IsTouch ? 'touchmove' : "mousemove", this.mouseMoveBinded = this.mouseMove.bind(this));
 	}
 
 	private mouseUp()
 	{
 		this.resizingNode = null;
-		window.removeEventListener("mouseup", this.mouseUpBinded);
-		window.removeEventListener("mousemove", this.mouseMoveBinded);
+		window.removeEventListener(IsTouch ? 'touchend' : "mouseup", this.mouseUpBinded);
+		window.removeEventListener(IsTouch ? 'touchmove' : "mousemove", this.mouseMoveBinded);
 		this.changedCallback();
 	}
 
 
 	private mouseMove(e: MouseEvent)
 	{
-		let position = e.x - this.rectSereies.left;
+		let position = (IsTouch ? (e as any).changedTouches[0].clientX : e.x) - this.rectSereies.left;
 		if (this.resizingNode == this.leftNode)
 		{
 			if (position < 0)
@@ -178,6 +180,8 @@ export default class ScrollBox {
 		else
 		{
 			//simple move of center node
+			if (IsTouch)
+				position += this.rectSereies.left + this.marginLeft;
 			position -= this.centerOffsetX + this.RESIZER_WIDTH;
 			if (position < 0)
 				position = 0;
