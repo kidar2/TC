@@ -235,6 +235,14 @@ export default class Chart {
 		this.svg.setAttribute("viewBox", "0 0 " + this.config.width + " " + svgHeight);
 		this.svg.style.width = this.config.width + 'px';
 		this.svg.style.height = svgHeight + 'px';
+
+		if (!this.xAxis.allLabelsVisible)
+			this.scrollBox.update(
+				 this.config.width,
+				 this.scrollBoxHeight,
+				 "0 0 " + this.config.width + " " + this.getSVGNodeHeight());
+		else
+			this.scrollBox.hide();
 	}
 
 	public update(animateAxises: boolean = true, sereisVisibleChangedId: string = null)
@@ -253,12 +261,5 @@ export default class Chart {
 				 animateSize = !IsEdge && sereisVisibleChangedId && !animateVisible;
 			s.update(this.getPlotAreaHeight(), this.getPlotAreaWidth(), this.getMarginLeft(), animateVisible, animateSize);
 		});
-		if (!this.xAxis.allLabelsVisible)
-			this.scrollBox.update(
-				 this.config.width,
-				 this.scrollBoxHeight,
-				 "0 0 " + this.config.width + " " + this.getSVGNodeHeight());
-		else
-			this.scrollBox.hide();
 	}
 }

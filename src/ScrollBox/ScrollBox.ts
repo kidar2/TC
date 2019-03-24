@@ -29,6 +29,8 @@ export default class ScrollBox {
 
 	private readonly RESIZER_WIDTH: number;
 
+	private width: number;
+
 	/**
 	 *
 	 * @param parentNode node for render
@@ -114,12 +116,22 @@ export default class ScrollBox {
 		if (this.leftWidth == null)
 			this.leftNode.style.width = '0px';
 		else
+		{
+			if (this.width != width)
+				this.leftWidth = this.leftWidth * width / this.width;
 			this.leftNode.style.width = this.leftWidth + 'px';
+		}
 
 		if (this.rightWidth == null)
 			this.rightNode.style.width = '0px';
 		else
+		{
+			if (this.width != width)
+				this.rightWidth = this.rightWidth * width / this.width;
 			this.rightNode.style.width = this.rightWidth + 'px';
+		}
+
+		this.width = width;
 	}
 
 	private resizerMouseDown(e: MouseEvent)

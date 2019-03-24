@@ -196,7 +196,7 @@ export default class XAxis {
 				this.timeoutid = null;
 				this.hideGroup(oldGroup, animate);
 				this.showGroup(newGroup, -animate);
-			}, 30);
+			}, 100);
 		}
 		else
 		{

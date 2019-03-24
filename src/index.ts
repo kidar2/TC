@@ -18,7 +18,7 @@ function main()
 			document.body.className = select.value;
 	});
 
-	let w = Math.max(document.body.offsetWidth - 300, 300),
+	let w = Math.max(document.body.offsetWidth - 100, 300),
 		 charts: Chart[] = [];
 
 	CHARTS_DATA.forEach((data, index) =>
@@ -33,7 +33,7 @@ function main()
 				type: CategoriesType.date,
 				showGrid: false
 			},
-			title: `Chart 1`,
+			title: `Chart ${index}`,
 			width: w,
 			height: 400
 		}));
@@ -48,7 +48,7 @@ function main()
 		id = setTimeout(() =>
 		{
 			id = null;
-			charts.forEach(c => c.setSize(document.body.offsetWidth - 300, 400));
+			charts.forEach(c => c.setSize(document.body.offsetWidth - 100, 400));
 		}, 100);
 	});
 }
