@@ -104,6 +104,7 @@ export default class Chart {
 		this.scrollBox = new ScrollBox(this.root, this.yAxis, this.xAxis, () => this.onScrollChanged());
 
 		this.setSize(this.config.width, this.config.height);
+		this.updateScroll();
 		this.svg.addEventListener("mousemove", (e: MouseEvent) => this.onMouseMove(e));
 		this.svg.addEventListener("mouseout", () => this.hideToolTip());
 
@@ -200,7 +201,7 @@ export default class Chart {
 		s.visible = !s.visible;
 		this.updateMinMax();
 		this.update(true, serId);
-		this.scrollBox.updateSeriesVisible(s);
+		this.updateScroll();
 	}
 
 	public getPlotAreaHeight()
@@ -229,14 +230,21 @@ export default class Chart {
 		this.config.height = height;
 		this.root.style.width = this.config.width + 'px';
 		this.root.style.height = this.config.height + 'px';
+
+		this.xAxis.recalcMainScale(width);
+
+		this.updateScroll();
 		this.update(false);
 
 		let svgHeight = this.getSVGNodeHeight();
 		this.svg.setAttribute("viewBox", "0 0 " + this.config.width + " " + svgHeight);
 		this.svg.style.width = this.config.width + 'px';
 		this.svg.style.height = svgHeight + 'px';
+	}
 
-		if (!this.xAxis.allLabelsVisible)
+	private updateScroll()
+	{
+		if (this.xAxis.allLabelsVisible == false)
 			this.scrollBox.update(this.getPlotAreaWidth(), this.scrollBoxHeight, this.series, this.getMarginLeft());
 		else
 			this.scrollBox.hide();
@@ -249,7 +257,7 @@ export default class Chart {
 		this.yAxis.prepare(this.min, this.max);
 		this.xAxis.prepare(this.getPlotAreaWidth(), this.yAxis.getWidth());
 
-		this.yAxis.update(this.getPlotAreaHeight(), this.config.width + 50, animateAxises);
+		this.yAxis.update(this.getPlotAreaHeight(), this.config.width, animateAxises);
 		this.xAxis.update(this.getPlotAreaHeight(), this.yAxis.heightOfLabels, this.getPlotAreaWidth(), this.yAxis.getWidth(), this.scrollBox.getLeftPosition(), this.scrollBox.getRightPosition(), animateAxises);
 
 		this.series.forEach(s =>

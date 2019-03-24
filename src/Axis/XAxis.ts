@@ -74,34 +74,50 @@ export default class XAxis {
 		}
 	}
 
+	public getLabelWidth()
+	{
+		if (this.labelWidth == null)
+			this.labelWidth = calcSize(this.labels, this.config.fontSize).width;
+		return this.labelWidth;
+	}
+
 	public prepare(width: number, marginLeft: number)
 	{
 		this.labelMargin = this.DEFAULT_LABEL_MARGIN;
 		width -= this.config.marginRight + marginLeft;
-		if (this.labelWidth == null)
-			this.labelWidth = calcSize(this.labels, this.config.fontSize).width;
-		this.countView = Math.round(width / (this.labelWidth + this.labelMargin));
+
+		this.countView = Math.round(width / (this.getLabelWidth() + this.labelMargin));
 		this.allLabelsVisible = (this.labels.length - 1) / this.countView <= 1;
 	}
 
 	public calcScaleX(pointCount: number, width: number)
 	{
 		let labelScale = [],
-			 stepScaleX = (width - this.labelWidth / 2) / pointCount,
+			 stepScaleX = (width - this.getLabelWidth() / 2) / pointCount,
 			 sumXLabel = 0,
 			 scaleX = 0;
 
 		for (let i = 0; i < pointCount; i++)
 		{
-			labelScale.push({x: scaleX});
+			labelScale.push({x: scaleX, label: this.labels[i], index: i});
 
 			if (scaleX >= sumXLabel)
-				sumXLabel = scaleX + this.labelWidth + this.labelMargin + this.labelWidth / 2;
+				sumXLabel = scaleX + this.getLabelWidth() + this.labelMargin + this.getLabelWidth() / 2;
 
 			scaleX += stepScaleX;
 		}
 
 		return labelScale;
+	}
+
+	public recalcMainScale(width: number)
+	{
+		this.allLabelsScale = this.calcScaleX(this.labels.length, width);
+	}
+
+	public getMainScale()
+	{
+		return this.allLabelsScale;
 	}
 
 	public update(bottomPoint: number,
@@ -190,9 +206,6 @@ export default class XAxis {
 		}
 
 		this.labelsScale = labelScale;
-
-		if (!this.allLabelsScale)
-			this.allLabelsScale = this.labelsScale;
 
 		this.renderGroups(oldGroup, this.group, animateType);
 	}
