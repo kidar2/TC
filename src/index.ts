@@ -33,7 +33,7 @@ function main()
 				type: CategoriesType.date,
 				showGrid: false
 			},
-			title: `Chart ${index}`,
+			title: `Chart ${index + 1}`,
 			width: w,
 			height: 400
 		}));
