@@ -41,7 +41,7 @@ export default class XAxis {
 	public allLabelsVisible: boolean;
 	public labelWidth: number;
 	private countView: number;     //calculated number of possible labels to display
-	private labelMargin: number;
+	public labelMargin: number;
 	DEFAULT_LABEL_MARGIN: number;  //default margin between labels
 	private startCategoryIndex: number;
 	private endCategoryIndex: number;
@@ -84,6 +84,25 @@ export default class XAxis {
 		this.allLabelsVisible = (this.labels.length - 1) / this.countView <= 1;
 	}
 
+	public calcScaleX(pointCount: number, width: number)
+	{
+		let labelScale = [],
+			 stepScaleX = (width - this.labelWidth / 2) / pointCount,
+			 sumXLabel = 0,
+			 scaleX = 0;
+
+		for (let i = 0; i < pointCount; i++)
+		{
+			labelScale.push({x: scaleX});
+
+			if (scaleX >= sumXLabel)
+				sumXLabel = scaleX + this.labelWidth + this.labelMargin + this.labelWidth / 2;
+
+			scaleX += stepScaleX;
+		}
+
+		return labelScale;
+	}
 
 	public update(bottomPoint: number,
 					  topPoint: number,
@@ -356,5 +375,4 @@ export default class XAxis {
 	{
 		return this.allLabelsScale.indexOf(this.getCategory(position, this.allLabelsScale));
 	}
-
 }

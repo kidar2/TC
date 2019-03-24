@@ -1,6 +1,8 @@
 import './ScrollBox.scss';
-import {createNode} from "./../Util";
+import {createNode, createSVGNode, removeNode} from "./../Util";
 import LineSeries from "../LineSeries";
+import YAxis from "../Axis/YAxis";
+import XAxis from "../Axis/XAxis";
 
 const IsTouch = !!('ontouchstart' in window);
 
@@ -8,7 +10,7 @@ export default class ScrollBox {
 	private readonly parentNode: HTMLElement;
 	private root: HTMLElement;
 	private svg: SVGSVGElement;
-	private originalSVGNode: SVGSVGElement;
+
 	private seriesGroup: SVGElement;
 	private scrollNode: HTMLElement;
 	private leftResizer: HTMLElement;
@@ -22,15 +24,22 @@ export default class ScrollBox {
 	private mouseMoveBinded: any;
 	private mouseUpBinded: any;
 	private marginLeft: number;
-	private rectSereies: ClientRect | DOMRect;
 	private centerNode: HTMLElement;
 	private centerOffsetX: number;
 	private centerWidth: number;
 	private changedCallback: Function;
 
+	private nodes: SVGElement[];
+
+	private yAxis: YAxis;
+	private xAxis: XAxis;
+	private topValue: number;
+	private bottomValue: number;
+
 	private readonly RESIZER_WIDTH: number;
 
 	private width: number;
+	private scrollNodeRect: any;
 
 	/**
 	 *
@@ -39,11 +48,13 @@ export default class ScrollBox {
 	 * @param changedCallback call when scroll was changed
 	 */
 	constructor(parentNode: HTMLElement,
-					svgNode: SVGSVGElement,
+					yAxis: YAxis,
+					xAxis: XAxis,
 					changedCallback: Function)
 	{
 		this.RESIZER_WIDTH = 5;
-		this.originalSVGNode = svgNode;
+		this.yAxis = yAxis;
+		this.xAxis = xAxis;
 		this.parentNode = parentNode;
 		this.changedCallback = changedCallback;
 		this.root = createNode('div', this.parentNode);
@@ -85,42 +96,84 @@ export default class ScrollBox {
 		});
 	}
 
-	update(width: number, height: number, viewBox: string)
+
+	public update(areaWidth: number,
+					  areaHeight: number,
+					  series: LineSeries[],
+					  marginLeft: number)
 	{
 		this.root.style.display = '';
 
-		if (this.seriesGroup.childNodes.length == 0)
+		areaWidth -= this.xAxis.config.marginRight;
+
+		if (this.nodes)
+			this.nodes.forEach(n => removeNode(n));
+		this.nodes = [];
+		this.svg.setAttribute("viewBox", "0 0 " + areaWidth + " " + areaHeight);
+		this.svg.style.width = areaWidth + 'px';
+		this.svg.style.height = areaHeight + 'px';
+
+		if (this.topValue == null)
+			this.topValue = this.yAxis.getTopValue();
+		if (this.bottomValue == null)
+			this.bottomValue = this.yAxis.getBottomValue();
+
+		let labelScale = this.xAxis.calcScaleX(series[0].config.data.length, areaWidth);
+
+		for (let ser of series)
 		{
-			let nodes = this.originalSVGNode.querySelectorAll('polyline');
-			for (let i = 0; i < nodes.length; i++)
+			if (ser.visible)
 			{
-				let polyline = nodes.item(i).cloneNode() as SVGElement;
-				polyline.setAttribute('stroke-width', '1');
-				polyline.setAttribute('fill', 'transparent');
-				polyline.setAttribute("shape-rendering", "geometricPrecision");
-				this.seriesGroup.appendChild(polyline);
+				let points = "";
+				for (let i = 0; i < ser.config.data.length; i++)
+				{
+					let value = ser.config.data[i] as number;
+
+					if (value != null)
+					{
+						let y = areaHeight - this.yAxis.calcHeightByValue(value, this.topValue, this.bottomValue, areaHeight),
+							 x = labelScale[i].x + marginLeft;
+						if (points)
+							points += ', ';
+						points += x + " " + y;
+					}
+					else if (points)
+					{
+						this.nodes.push(createSVGNode("polyline", this.svg, {
+							points,
+							fill: "transparent",
+							"series-id": ser.id,
+							stroke: ser.config.color,
+							'stroke-width': '1'
+						}));
+						points = "";
+					}
+				}
+
+				if (points)
+					this.nodes.push(createSVGNode("polyline", this.svg, {
+						points,
+						"series-id": ser.id,
+						fill: "transparent",
+						stroke: ser.config.color,
+						'stroke-width': '1'
+					}));
 			}
-			this.svg.setAttribute("viewBox", viewBox);
 		}
-		this.svg.style.width = width + 'px';
-		this.svg.style.height = height + 'px';
 
 
-		this.scrollNode.style.height = height + 'px';
+		this.scrollNode.style.height = areaHeight + 'px';
 
-		this.rectSereies = (this.svg.firstChild as HTMLElement).getBoundingClientRect();
-		let rootRect = (this.root as HTMLElement).getBoundingClientRect();
-
-		this.marginLeft = this.rectSereies.left - rootRect.left;
+		this.marginLeft = marginLeft;
 		this.scrollNode.style.marginLeft = this.marginLeft + 'px';
-		this.scrollNode.style.width = this.rectSereies.width + 'px';
+		this.scrollNode.style.width = areaWidth - this.marginLeft + 'px';
 
 		if (this.leftWidth == null)
 			this.leftNode.style.width = '0px';
 		else
 		{
-			if (this.width != width)
-				this.leftWidth = this.leftWidth * width / this.width;
+			if (this.width != areaWidth)
+				this.leftWidth = this.leftWidth * areaWidth / this.width;
 			this.leftNode.style.width = this.leftWidth + 'px';
 		}
 
@@ -128,20 +181,21 @@ export default class ScrollBox {
 			this.rightNode.style.width = '0px';
 		else
 		{
-			if (this.width != width)
-				this.rightWidth = this.rightWidth * width / this.width;
+			if (this.width != areaWidth)
+				this.rightWidth = this.rightWidth * areaWidth / this.width;
 			this.rightNode.style.width = this.rightWidth + 'px';
 		}
 
-		this.width = width;
+		this.width = areaWidth;
 	}
 
 	private resizerMouseDown(e: MouseEvent)
 	{
-		this.centerOffsetX = IsTouch ? (e as any).changedTouches[0].clientX - this.leftWidth + this.marginLeft : e.offsetX;
+		this.centerOffsetX = IsTouch ? (e as any).changedTouches[0].clientX - this.leftWidth : e.offsetX;
 		this.centerWidth = this.centerNode.offsetWidth;
 		window.addEventListener(IsTouch ? 'touchend' : "mouseup", this.mouseUpBinded = this.mouseUp.bind(this));
 		window.addEventListener(IsTouch ? 'touchmove' : "mousemove", this.mouseMoveBinded = this.mouseMove.bind(this));
+		this.scrollNodeRect = this.scrollNode.getBoundingClientRect();
 	}
 
 	private mouseUp()
@@ -155,7 +209,7 @@ export default class ScrollBox {
 
 	private mouseMove(e: MouseEvent)
 	{
-		let position = (IsTouch ? (e as any).changedTouches[0].clientX : e.x) - this.rectSereies.left;
+		let position = (IsTouch ? (e as any).changedTouches[0].clientX : e.clientX) - this.scrollNodeRect.x;
 		if (this.resizingNode == this.leftNode)
 		{
 			if (position < 0)
@@ -168,7 +222,7 @@ export default class ScrollBox {
 		}
 		else if (this.resizingNode == this.rightNode)
 		{
-			let w = this.rectSereies.width - position;
+			let w = this.width - position - this.marginLeft;
 			if (w < 0)
 				w = 0;
 			if (this.checkMinSize(this.leftWidth, w))
@@ -181,12 +235,14 @@ export default class ScrollBox {
 		{
 			//simple move of center node
 			if (IsTouch)
-				position += this.rectSereies.left + this.marginLeft;
-			position -= this.centerOffsetX + this.RESIZER_WIDTH;
+				position = position + this.marginLeft - this.centerOffsetX + this.RESIZER_WIDTH;
+			else
+				position = position - this.centerOffsetX - this.RESIZER_WIDTH;
+
 			if (position < 0)
 				position = 0;
 
-			let rightw = this.rectSereies.width - position - this.centerWidth - this.RESIZER_WIDTH * 2;
+			let rightw = this.width - position - this.centerWidth - this.RESIZER_WIDTH * 2 - this.marginLeft;
 
 			if (rightw >= 0)
 			{

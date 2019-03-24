@@ -67,15 +67,17 @@ export default class YAxis {
 		}
 	}
 
-	public calcHeightByValue(y: number, topValue: number, bottomValue: number)
+	public calcHeightByValue(y: number, topValue: number, bottomValue: number, customHeight?: number)
 	{
+		if (!customHeight)
+			customHeight = this.height;
 		if (bottomValue < 0)
 		{
 			y += Math.abs(bottomValue);
 			topValue += Math.abs(bottomValue);
 		}
 		let perc = y / topValue;
-		return perc * this.height;
+		return perc * customHeight;
 	}
 
 	shouldAnimate()

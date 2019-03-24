@@ -101,7 +101,7 @@ export default class Chart {
 			throw new Error('Category axis (X) is not find');
 
 		this.updateMinMax();
-		this.scrollBox = new ScrollBox(this.root, this.svg, () => this.onScrollChanged());
+		this.scrollBox = new ScrollBox(this.root, this.yAxis, this.xAxis, () => this.onScrollChanged());
 
 		this.setSize(this.config.width, this.config.height);
 		this.svg.addEventListener("mousemove", (e: MouseEvent) => this.onMouseMove(e));
@@ -237,10 +237,7 @@ export default class Chart {
 		this.svg.style.height = svgHeight + 'px';
 
 		if (!this.xAxis.allLabelsVisible)
-			this.scrollBox.update(
-				 this.config.width,
-				 this.scrollBoxHeight,
-				 "0 0 " + this.config.width + " " + this.getSVGNodeHeight());
+			this.scrollBox.update(this.getPlotAreaWidth(), this.scrollBoxHeight, this.series, this.getMarginLeft());
 		else
 			this.scrollBox.hide();
 	}
