@@ -1,4 +1,5 @@
 Проостейшие линеный графики со сроллом и анимацией на svg
+Пример работы по ссылке https://kidar2.github.io/TC/dist/index.html
 
 Javascript  application for showing simple charts based on input data. 
 
