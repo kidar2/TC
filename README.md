@@ -1,4 +1,4 @@
-Проостейшая линеный графики со сроллом и анимацией на svg
+Проостейшие линеный графики со сроллом и анимацией на svg
 
 Javascript  application for showing simple charts based on input data. 
 
